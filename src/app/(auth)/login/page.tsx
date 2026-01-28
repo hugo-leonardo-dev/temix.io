@@ -1,15 +1,48 @@
+// src/app/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login:", { email, password });
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Email ou senha inválidos");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Login com sucesso
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError("Erro ao fazer login. Tente novamente.");
+      setLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    setLoading(true);
+    await signIn(provider, { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -23,6 +56,13 @@ export default function Login() {
         {/* Card de Login */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Entrar</h2>
+
+          {/* Mensagem de erro */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Campo Email */}
@@ -45,6 +85,7 @@ export default function Login() {
                   placeholder="seu@email.com"
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -69,11 +110,13 @@ export default function Login() {
                   placeholder="••••••••"
                   className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xl hover:scale-110 transition-transform"
+                  disabled={loading}
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
@@ -86,6 +129,7 @@ export default function Login() {
                 <input
                   type="checkbox"
                   className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-600"
+                  disabled={loading}
                 />
                 <span className="text-gray-600">Lembrar-me</span>
               </label>
@@ -100,9 +144,10 @@ export default function Login() {
             {/* Botão Login */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Entrar
+              {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 
@@ -115,13 +160,21 @@ export default function Login() {
 
           {/* Botões Sociais */}
           <div className="space-y-3">
-            <button className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all">
+            <button
+              onClick={() => handleSocialLogin("google")}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50"
+            >
               <span className="text-2xl">🔵</span>
               <span className="font-medium text-gray-700">
                 Continuar com Google
               </span>
             </button>
-            <button className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all">
+            <button
+              onClick={() => handleSocialLogin("github")}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50"
+            >
               <span className="text-2xl">⚫</span>
               <span className="font-medium text-gray-700">
                 Continuar com GitHub
