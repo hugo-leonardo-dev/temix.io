@@ -37,10 +37,10 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6">
           {session ? (
             <>
-              <Button className="shadow-lg shadow-primary/20" asChild>
+              <Button className="shadow-lg shadow-primary/20 " asChild>
                 <Link href="/rooms/create">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Room
+                  New Room
                 </Link>
               </Button>
 
@@ -61,7 +61,7 @@ export default function Header() {
                   className="w-40 border-border bg-popover"
                 >
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Perfil</Link>
+                    <Link href="/dashboard">Profile</Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
@@ -70,7 +70,7 @@ export default function Header() {
                     className="text-destructive focus:text-destructive"
                     onClick={() => signOut({ callbackUrl: "/" })}
                   >
-                    Exit
+                    Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -82,11 +82,11 @@ export default function Header() {
                 className="text-muted-foreground hover:text-foreground"
                 asChild
               >
-                <Link href="/login">Entrar</Link>
+                <Link href="/login">Login</Link>
               </Button>
 
               <Button className="shadow-md shadow-primary/20" asChild>
-                <Link href="/register">Criar conta</Link>
+                <Link href="/register">Register</Link>
               </Button>
             </>
           )}
@@ -116,35 +116,35 @@ export default function Header() {
                     href="/dashboard"
                     className="font-medium text-muted-foreground transition hover:text-foreground"
                   >
-                    Perfil
+                    Profile
                   </Link>
 
                   <Link
                     href="/rooms"
                     className="font-medium text-muted-foreground transition hover:text-foreground"
                   >
-                    Salas
+                    Rooms
                   </Link>
 
                   <Button asChild>
-                    <Link href="/create-room">Criar sala</Link>
+                    <Link href="/create-room">New room</Link>
                   </Button>
 
                   <Button
                     variant="destructive"
                     onClick={() => signOut({ callbackUrl: "/" })}
                   >
-                    Sair
+                    Sign out
                   </Button>
                 </>
               ) : (
                 <>
                   <Button variant="ghost" asChild>
-                    <Link href="/login">Entrar</Link>
+                    <Link href="/login">Login</Link>
                   </Button>
 
                   <Button asChild>
-                    <Link href="/register">Criar conta</Link>
+                    <Link href="/register">Register</Link>
                   </Button>
                 </>
               )}

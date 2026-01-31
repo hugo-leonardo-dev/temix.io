@@ -1,11 +1,24 @@
+// app/(main)/page.tsx
 import { prisma } from "@/lib/prisma";
 import RoomCard from "@/components/RoomCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
+  const session = await auth();
+
+  if (!session) return redirect("/login");
+
   const rooms = await prisma.room.findMany({
+    where: {
+      OR: [
+        { creatorId: session!.user!.id },
+        { players: { some: { playerId: session!.user!.id } } },
+      ],
+    },
     include: {
       creator: {
         select: { name: true, image: true },
@@ -14,27 +27,49 @@ export default async function Home() {
         select: { players: true },
       },
     },
+    orderBy: { createdAt: "desc" },
   });
 
   return (
-    <div className="">
-      <div className="flex items-center justify-between">
+    <div>
+      {/* Header com nome do usuário */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100 mb-4">Your Rooms</h1>
+          <h1 className="text-3xl font-bold text-zinc-100 mb-2">
+            Welcome back, {session!.user!.name}! 👋
+          </h1>
+          <p className="text-zinc-400">Your active rooms and games</p>
         </div>
+        <Button
+          asChild
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25"
+        >
+          <Link href="/rooms/create">
+            <Plus className="mr-2 h-5 w-5" />
+            Create Room
+          </Link>
+        </Button>
       </div>
 
+      {/* Empty State ou Grid de Salas */}
       {rooms.length === 0 ? (
         <div className="text-center py-20">
-          <div className="text-6xl mb-4">🎮</div>
-          <h3 className="text-xl font-semibold text-zinc-300 mb-2">
+          <div className="text-7xl mb-6">🎮</div>
+          <h3 className="text-2xl font-semibold text-zinc-200 mb-3">
             No rooms yet
           </h3>
-          <p className="text-zinc-500 mb-6">
-            Create your first room to get started!
+          <p className="text-zinc-400 mb-8 max-w-md mx-auto">
+            Create your first room and invite friends to play together!
           </p>
-          <Button asChild>
-            <Link href="/rooms/create">Create Room</Link>
+          <Button
+            asChild
+            size="lg"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25"
+          >
+            <Link href="/rooms/create">
+              <Plus className="mr-2 h-5 w-5" />
+              Create Your First Room
+            </Link>
           </Button>
         </div>
       ) : (

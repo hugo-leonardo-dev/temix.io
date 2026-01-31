@@ -1,10 +1,24 @@
+// src/app/register/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react"; // npm i lucide-react
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  UserPlus,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -23,7 +37,6 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // 1. Registrar
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,9 +49,7 @@ export default function RegisterPage() {
         return;
       }
 
-      const { user } = await res.json();
-
-      // 2. Login automático
+      // Login automático
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
@@ -46,8 +57,8 @@ export default function RegisterPage() {
       });
 
       if (result?.ok) {
-        router.push("/"); // Ou "/"
-        router.refresh(); // Atualiza session
+        router.push("/");
+        router.refresh();
       } else {
         setError("Falha no login após registro");
       }
@@ -59,93 +70,151 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-md w-full border">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Criar Conta
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-pink-950/20 to-zinc-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
+            Temix.io
+          </h1>
+        </div>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nome
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="Seu nome"
-            />
+        <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-800 shadow-2xl shadow-pink-500/10 p-8">
+          <div className="mb-2">
+            <h2 className="text-2xl font-bold text-zinc-100 mb-1">
+              Join the game
+            </h2>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Senha
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Mín. 6 caracteres"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+          {/* Mensagem de erro */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
-          </div>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg"
-          >
-            {loading ? "Criando..." : "Criar Conta"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Campo Nome */}
+            <div>
+              <Label htmlFor="name" className="text-zinc-300">
+                Name
+              </Label>
+              <div className="relative mt-2">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                <Input
+                  type="text"
+                  id="name"
+                  required
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  placeholder="Your name"
+                  className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-pink-500"
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Já tem conta?{" "}
+            {/* Campo Email */}
+            <div>
+              <Label htmlFor="email" className="text-zinc-300">
+                Email
+              </Label>
+              <div className="relative mt-2">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                <Input
+                  type="email"
+                  id="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="seu@email.com"
+                  className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-pink-500"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Campo Senha */}
+            <div>
+              <Label htmlFor="password" className="text-zinc-300">
+                Password
+              </Label>
+              <div className="relative mt-2">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  required
+                  minLength={6}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  placeholder="Min. 6 characters"
+                  className="pl-10 pr-12 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-pink-500"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition"
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-zinc-500 mt-1.5">
+                Use at least 6 characters
+              </p>
+            </div>
+
+            {/* Botão Registrar */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25 text-white font-semibold"
+              size="lg"
+            >
+              <UserPlus className="mr-2 h-5 w-5" />
+              {loading ? "Creating account..." : "Create Account"}
+            </Button>
+          </form>
+
+          {/* Link para Login */}
+          <p className="text-center text-zinc-400 mt-6">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-pink-400 hover:text-pink-300 font-semibold transition"
+            >
+              Sign in
+            </Link>
+          </p>
+        </Card>
+
+        {/* Terms */}
+        <p className="text-center text-xs text-zinc-500 mt-6">
+          By creating an account, you agree to our{" "}
           <Link
-            href="/login"
-            className="font-semibold text-blue-600 hover:text-blue-700"
+            href="/terms"
+            className="text-zinc-400 hover:text-zinc-300 underline"
           >
-            Entrar
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            className="text-zinc-400 hover:text-zinc-300 underline"
+          >
+            Privacy Policy
           </Link>
         </p>
       </div>
