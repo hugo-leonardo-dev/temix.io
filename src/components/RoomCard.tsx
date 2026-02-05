@@ -8,8 +8,6 @@ import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
-type RoomStatus = "WAITING" | "PLAYING" | "FINISHED";
-
 const statusConfig = {
   WAITING: { variant: "secondary" as const, label: "Waiting" },
   PLAYING: { variant: "default" as const, label: "Playing" },

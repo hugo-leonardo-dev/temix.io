@@ -1,16 +1,12 @@
-// app/(main)/page.tsx
 import { prisma } from "@/lib/prisma";
 import RoomCard from "@/components/RoomCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 
 export default async function Home() {
   const session = await auth();
-
-  if (!session) return redirect("/login");
 
   const rooms = await prisma.room.findMany({
     where: {
@@ -32,7 +28,6 @@ export default async function Home() {
 
   return (
     <div>
-      {/* Header com nome do usuário */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-zinc-100 mb-2">
@@ -43,15 +38,9 @@ export default async function Home() {
         <Button
           asChild
           className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25"
-        >
-          <Link href="/rooms/create">
-            <Plus className="mr-2 h-5 w-5" />
-            Create Room
-          </Link>
-        </Button>
+        ></Button>
       </div>
 
-      {/* Empty State ou Grid de Salas */}
       {rooms.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-7xl mb-6">🎮</div>

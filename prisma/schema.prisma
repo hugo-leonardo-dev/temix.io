@@ -47,7 +47,7 @@ enum MedalType {
 model Room {
   id          String      @id @default(cuid())
   name        String
-  code        String      @unique @default(cuid())
+  code        String      @unique  
   maxPlayers  Int         @default(6)
   status      RoomStatus  @default(WAITING)
 

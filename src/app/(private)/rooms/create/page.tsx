@@ -16,6 +16,7 @@ import {
   Video,
   Music,
   Paintbrush,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -46,7 +47,11 @@ const CATEGORIES: { value: Category; label: string; icon: React.ReactNode }[] =
 
 export default function CreateRoom() {
   const router = useRouter();
+  // const { toast } = useToast(); // descomente se tiver toast
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<RoomFormData>({
     name: "",
     maxPlayers: 6,
@@ -60,6 +65,7 @@ export default function CreateRoom() {
 
   const updateFormData = (updates: Partial<RoomFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
+    setError(null);
   };
 
   const toggleCategory = (category: Category) => {
@@ -69,6 +75,7 @@ export default function CreateRoom() {
         ? prev.allowedCategories.filter((c) => c !== category)
         : [...prev.allowedCategories, category],
     }));
+    setError(null);
   };
 
   const canProceed = () => {
@@ -89,10 +96,44 @@ export default function CreateRoom() {
   };
 
   const handleSubmit = async () => {
-    console.log("Creating room:", formData);
-    // Aqui você fará a chamada à API
-    // const response = await fetch("/api/rooms", { method: "POST", body: JSON.stringify(formData) });
-    // router.push("/rooms");
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/rooms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create room");
+      }
+
+      // toast({ // descomente se tiver toast
+      //   title: "Room created!",
+      //   description: `Room code: ${data.room.code}`,
+      // });
+
+      // Redirecionar para a room criada
+      router.push(`/rooms/${data.room.id}`);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Something went wrong";
+      setError(errorMessage);
+
+      // toast({ // descomente se tiver toast
+      //   title: "Error",
+      //   description: errorMessage,
+      //   variant: "destructive",
+      // });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -114,6 +155,12 @@ export default function CreateRoom() {
         </div>
       </div>
 
+      {error && (
+        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
+
       <Card className="bg-zinc-900/80 border-zinc-800">
         <CardHeader>
           <CardTitle className="text-2xl text-zinc-100">
@@ -126,6 +173,7 @@ export default function CreateRoom() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* Steps 1-4 permanecem iguais */}
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
@@ -382,7 +430,8 @@ export default function CreateRoom() {
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Voting</span>
                   <span className="text-zinc-100 font-semibold">
-                    {formData.upvotesPerPlayer} / {formData.downvotesPerPlayer}
+                    ↑{formData.upvotesPerPlayer} / ↓
+                    {formData.downvotesPerPlayer}
                   </span>
                 </div>
                 <div className="flex justify-between items-start">
@@ -394,9 +443,10 @@ export default function CreateRoom() {
                         <Badge
                           key={cat}
                           variant="secondary"
-                          className="bg-zinc-700"
+                          className="bg-zinc-700 flex items-center gap-1"
                         >
-                          {category?.icon} {category?.label}
+                          <span className="text-xs">{category?.icon}</span>
+                          {category?.label}
                         </Badge>
                       );
                     })}
@@ -415,6 +465,7 @@ export default function CreateRoom() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentStep((prev) => prev - 1)}
+                disabled={isLoading}
                 className="flex-1 bg-zinc-800 border-zinc-700"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -425,7 +476,7 @@ export default function CreateRoom() {
             {currentStep < totalSteps ? (
               <Button
                 onClick={() => setCurrentStep((prev) => prev + 1)}
-                disabled={!canProceed()}
+                disabled={!canProceed() || isLoading}
                 className="flex-1"
               >
                 Next
@@ -434,11 +485,20 @@ export default function CreateRoom() {
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={!canProceed()}
+                disabled={!canProceed() || isLoading}
                 className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
               >
-                <Check className="mr-2 h-4 w-4" />
-                Create Room
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Create Room
+                  </>
+                )}
               </Button>
             )}
           </div>

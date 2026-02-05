@@ -1,5 +1,9 @@
-import { SessionProvider } from "next-auth/react";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
+
+export const metadata = {
+  title: "Temix.io",
+};
 
 export default function RootLayout({
   children,

@@ -24,7 +24,7 @@ export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky  top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link
           href="/"
@@ -35,61 +35,43 @@ export default function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          {session ? (
-            <>
-              <Button className="shadow-lg shadow-primary/20 " asChild>
-                <Link href="/rooms/create">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Room
-                </Link>
-              </Button>
+          <Button className="shadow-lg shadow-primary/20" asChild>
+            <Link href="/rooms/create">
+              <Plus className="mr-2 h-4 w-4" />
+              New Room
+            </Link>
+          </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full border border-border bg-card p-1 transition hover:bg-accent">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={session.user?.image ?? ""} />
-                      <AvatarFallback className="bg-muted text-foreground">
-                        {session.user?.name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                  </button>
-                </DropdownMenuTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 rounded-full border border-border bg-card p-1 transition hover:bg-accent">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={session?.user?.image ?? ""} />
+                  <AvatarFallback className="bg-muted text-foreground">
+                    {session?.user?.name?.[0] ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
 
-                <DropdownMenuContent
-                  align="end"
-                  className="w-40 border-border bg-popover"
-                >
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Profile</Link>
-                  </DropdownMenuItem>
+            <DropdownMenuContent
+              align="end"
+              className="w-40 border-border bg-popover"
+            >
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">Profile</Link>
+              </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+              <DropdownMenuSeparator />
 
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                  >
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-foreground"
-                asChild
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => signOut({ callbackUrl: "/login" })}
               >
-                <Link href="/login">Login</Link>
-              </Button>
-
-              <Button className="shadow-md shadow-primary/20" asChild>
-                <Link href="/register">Register</Link>
-              </Button>
-            </>
-          )}
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
 
         <Sheet>
@@ -110,44 +92,33 @@ export default function Header() {
             </SheetHeader>
 
             <div className="flex flex-col gap-4">
-              {session ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="font-medium text-muted-foreground transition hover:text-foreground"
-                  >
-                    Profile
-                  </Link>
+              <Link
+                href="/dashboard"
+                className="font-medium text-muted-foreground transition hover:text-foreground"
+              >
+                Profile
+              </Link>
 
-                  <Link
-                    href="/rooms"
-                    className="font-medium text-muted-foreground transition hover:text-foreground"
-                  >
-                    Rooms
-                  </Link>
+              <Link
+                href="/rooms"
+                className="font-medium text-muted-foreground transition hover:text-foreground"
+              >
+                Rooms
+              </Link>
 
-                  <Button asChild>
-                    <Link href="/create-room">New room</Link>
-                  </Button>
+              <Button asChild>
+                <Link href="/rooms/create">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New room
+                </Link>
+              </Button>
 
-                  <Button
-                    variant="destructive"
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                  >
-                    Sign out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" asChild>
-                    <Link href="/login">Login</Link>
-                  </Button>
-
-                  <Button asChild>
-                    <Link href="/register">Register</Link>
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="destructive"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+              >
+                Sign out
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
