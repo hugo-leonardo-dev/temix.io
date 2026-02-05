@@ -133,7 +133,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Opções */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
@@ -153,7 +152,6 @@ export default function Login() {
               </Link>
             </div>
 
-            {/* Botão Login */}
             <Button
               type="submit"
               disabled={loading}
@@ -165,14 +163,12 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-zinc-800"></div>
             <span className="text-zinc-500 text-sm">or continue with</span>
             <div className="flex-1 h-px bg-zinc-800"></div>
           </div>
 
-          {/* Botões Sociais */}
           <div className="space-y-3">
             <Button
               onClick={() => handleSocialLogin("google")}
@@ -213,7 +209,6 @@ export default function Login() {
             </Button>
           </div>
 
-          {/* Link para Registro */}
           <p className="text-center text-zinc-400 mt-6">
             Don't have an account?{" "}
             <Link

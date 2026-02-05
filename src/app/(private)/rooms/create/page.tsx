@@ -47,7 +47,6 @@ const CATEGORIES: { value: Category; label: string; icon: React.ReactNode }[] =
 
 export default function CreateRoom() {
   const router = useRouter();
-  // const { toast } = useToast(); // descomente se tiver toast
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +99,7 @@ export default function CreateRoom() {
     setError(null);
 
     try {
-      const response = await fetch("/api/rooms", {
+      const response = await fetch("/api/rooms/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -114,23 +113,11 @@ export default function CreateRoom() {
         throw new Error(data.error || "Failed to create room");
       }
 
-      // toast({ // descomente se tiver toast
-      //   title: "Room created!",
-      //   description: `Room code: ${data.room.code}`,
-      // });
-
-      // Redirecionar para a room criada
       router.push(`/rooms/${data.room.id}`);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Something went wrong";
       setError(errorMessage);
-
-      // toast({ // descomente se tiver toast
-      //   title: "Error",
-      //   description: errorMessage,
-      //   variant: "destructive",
-      // });
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +160,6 @@ export default function CreateRoom() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Steps 1-4 permanecem iguais */}
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>

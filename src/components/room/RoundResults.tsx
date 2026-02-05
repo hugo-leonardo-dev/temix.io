@@ -21,7 +21,6 @@ export default function RoundResults({
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-yellow-950/20 to-zinc-950">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
         <div className="text-center mb-8">
           <Badge variant="secondary" className="mb-4">
             Round {round.roundNumber} Complete!
@@ -32,7 +31,6 @@ export default function RoundResults({
           <p className="text-zinc-400">Theme: {round.theme.title}</p>
         </div>
 
-        {/* Podium */}
         <div className="space-y-4 mb-8">
           {sortedResponses.slice(0, 3).map((response: any, index: number) => {
             const medals = ["🥇", "🥈", "🥉"];
@@ -72,7 +70,6 @@ export default function RoundResults({
           })}
         </div>
 
-        {/* Next Round Button */}
         <div className="text-center">
           <Button
             size="lg"

@@ -4,11 +4,30 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, Play, Users, Hash } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Play,
+  Users,
+  Hash,
+  GamepadDirectional,
+  ThumbsUp,
+  ThumbsDown,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function WaitingLobby({ room }: { room: any }) {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isHost = session?.user?.id === room.creatorId;
+  const canStart = room.players.length >= 2;
 
   const copyCode = () => {
     navigator.clipboard.writeText(room.code);
@@ -17,12 +36,33 @@ export default function WaitingLobby({ room }: { room: any }) {
   };
 
   const startGame = async () => {
-    // TODO: POST /api/rooms/[id]/start
-    console.log("Starting game...");
+    setIsStarting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/rooms/${room.id}/start`, {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to start game");
+      }
+
+      // Recarregar a página ou redirecionar para o estado de jogo
+      router.refresh();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Something went wrong";
+      setError(errorMessage);
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-purple-950/20 to-zinc-950">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-zinc-100 mb-2">{room.name}</h1>
@@ -54,17 +94,24 @@ export default function WaitingLobby({ room }: { room: any }) {
             </div>
             <div className="text-xs text-zinc-400">Players</div>
           </Card>
+
           <Card className="bg-zinc-900/50 border-zinc-800 p-6 text-center">
-            <div className="text-4xl mb-2">🎯</div>
+            <GamepadDirectional className="h-8 w-8 mx-auto mb-2 text-purple-400" />
             <div className="text-2xl font-bold text-zinc-100">
               {room.totalRounds}
             </div>
             <div className="text-xs text-zinc-400">Rounds</div>
           </Card>
+
           <Card className="bg-zinc-900/50 border-zinc-800 p-6 text-center">
-            <div className="text-4xl mb-2">👍</div>
-            <div className="text-2xl font-bold text-zinc-100">
-              {room.upvotesPerPlayer}/{room.downvotesPerPlayer}
+            <div className="flex items-center justify-center gap-1 mb-2">
+              <ThumbsUp className="h-8 w-8 text-green-400" />
+              <ThumbsDown className="h-8 w-8 text-red-400" />
+            </div>
+            <div className="text-2xl font-bold text-zinc-100 flex items-center justify-center gap-1">
+              <span className="text-green-400">{room.upvotesPerPlayer}</span>
+              <span className="text-zinc-600">/</span>
+              <span className="text-red-400">{room.downvotesPerPlayer}</span>
             </div>
             <div className="text-xs text-zinc-400">Votes</div>
           </Card>
@@ -108,25 +155,42 @@ export default function WaitingLobby({ room }: { room: any }) {
           </div>
         </Card>
 
+        {error && (
+          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+            <p className="text-red-400 text-sm text-center">{error}</p>
+          </div>
+        )}
+
         <div className="text-center">
-          {room.creatorId === "current-user-id" ? ( // TODO: pegar user session
-            <Button
-              size="lg"
-              onClick={startGame}
-              disabled={room.players.length < 2}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25 px-8"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Start Game
-            </Button>
+          {isHost ? (
+            <div className="space-y-3">
+              <Button
+                size="lg"
+                onClick={startGame}
+                disabled={!canStart || isStarting}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25 px-8"
+              >
+                {isStarting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-5 w-5" />
+                    Start Game
+                  </>
+                )}
+              </Button>
+              {!canStart && (
+                <p className="text-sm text-zinc-500">
+                  Need at least 3 players to start
+                </p>
+              )}
+            </div>
           ) : (
             <p className="text-zinc-400">
               Waiting for host to start the game...
-            </p>
-          )}
-          {room.players.length < 2 && (
-            <p className="text-sm text-zinc-500 mt-2">
-              Need at least 2 players to start
             </p>
           )}
         </div>

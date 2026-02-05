@@ -13,14 +13,12 @@ export default function FinalResults({ room }: { room: any }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-purple-950/30 to-zinc-950">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
         <div className="text-center mb-12">
           <Trophy className="h-20 w-20 mx-auto mb-4 text-yellow-400" />
           <h1 className="text-5xl font-bold text-zinc-100 mb-2">Game Over!</h1>
           <p className="text-zinc-400 text-lg">{room.name}</p>
         </div>
 
-        {/* Podium */}
         <div className="space-y-4 mb-8">
           {sortedPlayers.map((player: any, index: number) => {
             const medals = ["🥇", "🥈", "🥉"];
@@ -67,7 +65,6 @@ export default function FinalResults({ room }: { room: any }) {
           })}
         </div>
 
-        {/* Actions */}
         <div className="text-center space-y-4">
           <Button size="lg" asChild>
             <Link href="/">

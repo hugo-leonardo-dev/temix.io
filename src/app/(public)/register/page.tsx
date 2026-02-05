@@ -85,7 +85,6 @@ export default function RegisterPage() {
             </h2>
           </div>
 
-          {/* Mensagem de erro */}
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -94,7 +93,6 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Campo Nome */}
             <div>
               <Label htmlFor="name" className="text-zinc-300">
                 Name
@@ -116,7 +114,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Campo Email */}
             <div>
               <Label htmlFor="email" className="text-zinc-300">
                 Email
@@ -138,7 +135,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Campo Senha */}
             <div>
               <Label htmlFor="password" className="text-zinc-300">
                 Password
@@ -176,7 +172,6 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Botão Registrar */}
             <Button
               type="submit"
               disabled={loading}
@@ -188,7 +183,6 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          {/* Link para Login */}
           <p className="text-center text-zinc-400 mt-6">
             Already have an account?{" "}
             <Link
@@ -200,7 +194,6 @@ export default function RegisterPage() {
           </p>
         </Card>
 
-        {/* Terms */}
         <p className="text-center text-xs text-zinc-500 mt-6">
           By creating an account, you agree to our{" "}
           <Link

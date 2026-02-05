@@ -1,16 +1,17 @@
-"use client";
-
 import SubmitPhase from "./SubmitPhase";
 import VotingPhase from "./VotingPhase";
 import RoundResults from "./RoundResults";
+import { auth } from "@/auth";
 
-export default function GamePlay({
+export default async function GamePlay({
   room,
   currentRound,
 }: {
   room: any;
   currentRound: any;
 }) {
+  const session = await auth();
+
   if (!currentRound) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -20,7 +21,15 @@ export default function GamePlay({
   }
 
   if (currentRound.status === "SUBMITTING") {
-    return <SubmitPhase room={room} round={currentRound} />;
+    return (
+      <SubmitPhase
+        room={{
+          ...room,
+          currentUserId: session?.user?.id,
+        }}
+        round={currentRound}
+      />
+    );
   }
 
   if (currentRound.status === "VOTING") {
