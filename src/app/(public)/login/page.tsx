@@ -14,7 +14,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Github,
   LogIn,
   AlertCircle,
 } from "lucide-react";
@@ -196,16 +195,6 @@ export default function Login() {
                 />
               </svg>
               Continue with Google
-            </Button>
-            <Button
-              onClick={() => handleSocialLogin("github")}
-              disabled={loading}
-              variant="outline"
-              className="w-full border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600"
-              size="lg"
-            >
-              <Github className="mr-2 h-5 w-5" />
-              Continue with GitHub
             </Button>
           </div>
 
