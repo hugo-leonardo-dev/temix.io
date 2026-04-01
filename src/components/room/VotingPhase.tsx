@@ -6,14 +6,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, ThumbsDown, Send, Clock } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function VotingPhase({
   room,
   round,
+  initialHasVoted,
 }: {
   room: any;
   round: any;
+  initialHasVoted?: boolean;
 }) {
+  const router = useRouter();
+  const [hasVoted, setHasVoted] = useState(initialHasVoted || false);
   const [votes, setVotes] = useState<
     Record<string, "UPVOTE" | "DOWNVOTE" | null>
   >({});
@@ -48,14 +53,24 @@ export default function VotingPhase({
         .filter(([_, voteType]) => voteType !== null)
         .map(([responseId, voteType]) => ({ responseId, voteType }));
 
-      // TODO: POST /api/rooms/[room.id]/rounds/[round.id]/votes
-      console.log("Submitting votes:", validVotes);
+      const res = await fetch(`/api/rooms/${room.id}/rounds/${round.id}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ votes: validVotes }),
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      alert("Votes submitted successfully!");
-    } catch (error) {
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to submit votes");
+      }
+
+      setHasVoted(true);
+      router.refresh();
+    } catch (error: any) {
       console.error("Error submitting votes:", error);
-      alert("Failed to submit votes");
+      alert(error.message || "Failed to submit votes");
     } finally {
       setLoading(false);
     }
@@ -63,6 +78,21 @@ export default function VotingPhase({
 
   const totalVotesCast = Object.values(votes).filter((v) => v !== null).length;
   const canSubmit = totalVotesCast > 0;
+
+  if (hasVoted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <Badge variant="secondary" className="mb-4">Round {round.roundNumber} - Voted</Badge>
+        <div className="bg-zinc-900/80 border border-zinc-800 p-8 rounded-2xl max-w-md w-full text-center shadow-xl">
+          <Clock className="w-16 h-16 text-purple-500 mx-auto mb-6 animate-pulse" />
+          <h2 className="text-2xl font-bold text-white mb-2">Votes Cast!</h2>
+          <p className="text-zinc-400">
+            Waiting for other players to finish voting...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen  ">

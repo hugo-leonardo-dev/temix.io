@@ -2,6 +2,7 @@ import SubmitPhase from "./SubmitPhase";
 import VotingPhase from "./VotingPhase";
 import RoundResults from "./RoundResults";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 export default async function GamePlay({
   room,
@@ -33,11 +34,23 @@ export default async function GamePlay({
   }
 
   if (currentRound.status === "VOTING") {
-    return <VotingPhase room={room} round={currentRound} />;
+    let hasVoted = false;
+    if (session?.user?.id) {
+      const existingVote = await prisma.vote.findFirst({
+        where: {
+          voterId: session.user.id,
+          response: { roundId: currentRound.id }
+        }
+      });
+      hasVoted = !!existingVote;
+    }
+
+    return <VotingPhase room={room} round={currentRound} initialHasVoted={hasVoted} />;
   }
 
   if (currentRound.status === "FINISHED") {
-    return <RoundResults room={room} round={currentRound} />;
+    const isHost = session?.user?.id === room.creatorId;
+    return <RoundResults room={room} round={currentRound} isHost={isHost} />;
   }
 
   return null;
