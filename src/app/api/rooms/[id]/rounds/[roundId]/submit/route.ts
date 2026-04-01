@@ -16,11 +16,11 @@ export async function POST(
 
     const { id: roomId, roundId } = await params;
     const body = await request.json();
-    const { content, mediaUrl, category } = body;
+    const { responses } = body;
 
-    if (!content || !content.trim()) {
+    if (!responses || !Array.isArray(responses)) {
       return NextResponse.json(
-        { error: "Content is required" },
+        { error: "Invalid responses format" },
         { status: 400 },
       );
     }
@@ -33,17 +33,12 @@ export async function POST(
             players: true,
           },
         },
-        theme: true,
         responses: true,
       },
     });
 
     if (!round) {
       return NextResponse.json({ error: "Round not found" }, { status: 404 });
-    }
-
-    if (round.roomId !== roomId) {
-      return NextResponse.json({ error: "Invalid round" }, { status: 400 });
     }
 
     if (round.status !== "SUBMITTING") {
@@ -53,62 +48,52 @@ export async function POST(
       );
     }
 
-    const isPlayerInRoom = round.room.players.some(
-      (p) => p.playerId === session.user.id,
-    );
+    // Upsert each response in a transaction
+    await prisma.$transaction(async (tx) => {
+      for (const resData of responses) {
+        if (!resData.content && !resData.mediaUrl) continue;
 
-    if (!isPlayerInRoom) {
-      return NextResponse.json(
-        { error: "You are not in this room" },
-        { status: 403 },
-      );
-    }
-
-    const existingResponse = round.responses.find(
-      (r) => r.playerId === session.user.id,
-    );
-
-    if (existingResponse) {
-      return NextResponse.json(
-        { error: "You already submitted a response" },
-        { status: 400 },
-      );
-    }
-
-    const themeCategory = round.theme.category;
-
-    if (themeCategory !== Category.TEXT && mediaUrl) {
-      if (!isValidUrl(mediaUrl)) {
-        return NextResponse.json(
-          { error: "Invalid media URL" },
-          { status: 400 },
-        );
+        await tx.response.upsert({
+          where: {
+            roundId_authorId_category: {
+              roundId: round.id,
+              authorId: session.user.id,
+              category: resData.category as Category,
+            },
+          },
+          update: {
+            content: resData.content?.trim() || "",
+            mediaUrl: resData.mediaUrl?.trim() || null,
+          },
+          create: {
+            content: resData.content?.trim() || "",
+            mediaUrl: resData.mediaUrl?.trim() || null,
+            category: resData.category as Category,
+            roundId: round.id,
+            authorId: session.user.id,
+          },
+        });
       }
-    }
+    });
 
-    const response = await prisma.response.create({
-      data: {
-        content: content.trim(),
-        mediaUrl: mediaUrl?.trim() || null,
-        roundId: round.id,
-        playerId: session.user.id,
-        submittedAt: new Date(),
-      },
+    // Re-check submissions to see if everyone is done
+    const updatedRound = await prisma.round.findUnique({
+      where: { id: roundId },
       include: {
-        player: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+        responses: true,
+        room: {
+          include: {
+            players: true,
           },
         },
       },
     });
 
-    const totalPlayers = round.room.players.length;
-    const totalResponses = round.responses.length + 1;
+    const uniquePlayersSubmitted = new Set(updatedRound?.responses.map(r => r.authorId)).size;
+    const totalPlayers = updatedRound?.room.players.length || 0;
+    const allSubmitted = uniquePlayersSubmitted >= totalPlayers;
 
-    if (totalResponses >= totalPlayers) {
+    if (allSubmitted) {
       await prisma.round.update({
         where: { id: round.id },
         data: { status: "VOTING" },
@@ -117,12 +102,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      response: {
-        id: response.id,
-        content: response.content,
-        mediaUrl: response.mediaUrl,
-      },
-      allSubmitted: totalResponses >= totalPlayers,
+      allSubmitted,
     });
   } catch (error) {
     console.error("Error submitting response:", error);

@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
-import { Send, Clock, Loader2, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Send, Clock, Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { DrawingCanvas } from "./DrawingCanvas";
 
 type CategoryResponse = {
   category: string;
@@ -21,7 +23,7 @@ const CATEGORY_CONFIG: Record<
   {
     label: string;
     placeholder: string;
-    inputType: "text" | "textarea" | "url" | "file" | "spotify";
+    inputType: "text" | "textarea" | "url" | "image-upload" | "spotify" | "drawing-canvas";
     helpText?: string;
   }
 > = {
@@ -32,15 +34,15 @@ const CATEGORY_CONFIG: Record<
   },
   IMAGE: {
     label: "Image",
-    placeholder: "https://example.com/image.jpg",
-    inputType: "url",
-    helpText: "Paste an image URL or upload (coming soon)",
+    placeholder: "Select an image...",
+    inputType: "image-upload",
+    helpText: "Capture a photo or select an image from your device",
   },
   PHOTO: {
     label: "Photo",
-    placeholder: "https://example.com/photo.jpg",
-    inputType: "url",
-    helpText: "Paste a photo URL or upload (coming soon)",
+    placeholder: "Select a photo...",
+    inputType: "image-upload",
+    helpText: "Capture a photo or select an image from your device",
   },
   VIDEO: {
     label: "Video",
@@ -56,9 +58,9 @@ const CATEGORY_CONFIG: Record<
   },
   DRAWING: {
     label: "Drawing",
-    placeholder: "https://example.com/drawing.jpg",
-    inputType: "url",
-    helpText: "Paste a drawing URL or upload (coming soon)",
+    placeholder: "Draw your response...",
+    inputType: "drawing-canvas",
+    helpText: "Use your finger or mouse to draw directly on the screen",
   },
 };
 
@@ -73,9 +75,12 @@ export default function SubmitPhase({
   const [responses, setResponses] = useState<Record<string, CategoryResponse>>(
     {},
   );
+  const [uploadingCategory, setUploadingCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const categories = room.allowedCategories || [];
 
@@ -117,6 +122,43 @@ export default function SubmitPhase({
     setError(null);
   };
 
+  const handleImageUpload = async (category: string, file: File) => {
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file");
+      return;
+    }
+
+    setUploadingCategory(category);
+    setError(null);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${room.id}/${round.id}/${room.currentUserId}-${Date.now()}.${fileExt}`;
+      const filePath = `responses/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from("temix-media")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("temix-media")
+        .getPublicUrl(filePath);
+
+      updateResponse(category, "mediaUrl", publicUrl);
+      updateResponse(category, "content", "Image uploaded successfully");
+    } catch (err: any) {
+      console.error("Error uploading image:", err);
+      setError("Failed to upload image. Please check your connection.");
+    } finally {
+      setUploadingCategory(null);
+    }
+  };
+
   const validateResponses = (): boolean => {
     for (const category of categories) {
       const response = responses[category];
@@ -135,6 +177,11 @@ export default function SubmitPhase({
         const urlToValidate = response.mediaUrl || response.content;
         if (urlToValidate && !isValidUrl(urlToValidate)) {
           setError(`Invalid URL for ${config.label}`);
+          return false;
+        }
+      } else if (config.inputType === "image-upload") {
+        if (!response.mediaUrl) {
+          setError(`Please upload an image for ${config.label}`);
           return false;
         }
       }
@@ -165,7 +212,7 @@ export default function SubmitPhase({
 
         return {
           category: cat,
-          content: response.content,
+          content: response.content || `Submitted ${config.label}`,
           mediaUrl: response.mediaUrl || null,
         };
       });
@@ -315,10 +362,68 @@ export default function SubmitPhase({
                   </div>
                 )}
 
+                {config.inputType === "image-upload" && (
+                  <div className="space-y-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture={category === "PHOTO" ? "environment" : undefined}
+                      className="hidden"
+                      ref={(el) => { fileInputRefs.current[category] = el; }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(category, file);
+                      }}
+                      disabled={loading || !!uploadingCategory}
+                    />
+
+                    {response.mediaUrl ? (
+                      <div className="relative group rounded-lg overflow-hidden border border-zinc-700 bg-zinc-800 aspect-video max-w-sm mx-auto">
+                        <img 
+                          src={response.mediaUrl} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => updateResponse(category, "mediaUrl", "")}
+                            disabled={loading}
+                          >
+                            <X className="h-4 w-4 mr-1" /> Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => !loading && !uploadingCategory && fileInputRefs.current[category]?.click()}
+                        className={`flex flex-col items-center justify-center p-12 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700 cursor-pointer hover:bg-zinc-800/80 transition-colors ${uploadingCategory === category ? 'opacity-50 pointer-events-none' : ''}`}
+                      >
+                        {uploadingCategory === category ? (
+                          <Loader2 className="h-10 w-10 text-purple-400 animate-spin mb-3" />
+                        ) : (
+                          <Upload className="h-10 w-10 text-zinc-500 mb-3" />
+                        )}
+                        <p className="text-sm font-medium text-zinc-300">
+                          {uploadingCategory === category ? "Uploading..." : "Select an image"}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-1 italic">
+                          JPG, PNG or GIF up to 5MB
+                        </p>
+                      </div>
+                    )}
+                    
+                    {config.helpText && (
+                      <p className="text-xs text-zinc-500 text-center">{config.helpText}</p>
+                    )}
+                  </div>
+                )}
+
                 {config.inputType === "spotify" && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 p-4 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
-                      <Upload className="h-5 w-5 text-zinc-500" />
+                      <ImageIcon className="h-5 w-5 text-zinc-500" />
                       <span className="text-sm text-zinc-400">
                         Spotify integration coming soon...
                       </span>
@@ -335,24 +440,48 @@ export default function SubmitPhase({
                   </div>
                 )}
 
-                {config.inputType === "file" && (
-                  <div className="flex items-center justify-center p-8 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
-                    <div className="text-center">
-                      <Upload className="h-8 w-8 text-zinc-500 mx-auto mb-2" />
-                      <p className="text-sm text-zinc-400">
-                        Upload coming soon...
-                      </p>
-                      <Input
-                        type="url"
-                        value={response.content}
-                        onChange={(e) =>
-                          updateResponse(category, "content", e.target.value)
-                        }
-                        placeholder="For now, paste a URL"
-                        className="mt-2"
-                        disabled={loading}
-                      />
-                    </div>
+                {config.inputType === "drawing-canvas" && (
+                  <div className="space-y-4">
+                    {response.mediaUrl ? (
+                      <div className="relative group rounded-lg overflow-hidden border border-zinc-700 bg-zinc-800 aspect-video max-w-sm mx-auto">
+                        <img 
+                          src={response.mediaUrl} 
+                          alt="Drawing Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => updateResponse(category, "mediaUrl", "")}
+                            disabled={loading}
+                          >
+                            <X className="h-4 w-4 mr-1" /> Redraw
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {uploadingCategory === category ? (
+                          <div className="flex flex-col items-center justify-center p-12 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
+                            <Loader2 className="h-10 w-10 text-purple-400 animate-spin mb-3" />
+                            <p className="text-sm font-medium text-zinc-300">Saving drawing...</p>
+                          </div>
+                        ) : (
+                          <DrawingCanvas
+                            disabled={loading || !!uploadingCategory}
+                            onSave={(blob) => {
+                              // Wrap blob in File object specifically for supabase upload helper
+                              const file = new File([blob], "drawing.png", { type: "image/png" });
+                              handleImageUpload(category, file);
+                            }}
+                          />
+                        )}
+                      </div>
+                    )}
+                    {config.helpText && (
+                      <p className="text-xs text-zinc-500 text-center">{config.helpText}</p>
+                    )}
                   </div>
                 )}
               </Card>
@@ -369,7 +498,7 @@ export default function SubmitPhase({
         <Button
           size="lg"
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || !!uploadingCategory}
           className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
         >
           {loading ? (

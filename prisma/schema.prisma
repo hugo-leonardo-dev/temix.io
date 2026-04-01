@@ -203,7 +203,7 @@ model Response {
   downvotes   Int       @default(0)
   votes       Vote[]
 
-  @@unique([roundId, authorId])
+  @@unique([roundId, authorId, category])
   @@map("responses")
 }
 
