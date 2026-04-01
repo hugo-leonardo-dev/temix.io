@@ -1,20 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function RoomRealtime({ roomId }: { roomId: string }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
-    const refresh = () => {
+    const refresh = (payload: any) => {
+      console.log(`[Realtime Event] ${payload.table} | ${payload.eventType}`);
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        router.refresh();
-      }, 500); // 500ms debounce
+        startTransition(() => {
+          router.refresh();
+        });
+      }, 300); // 300ms debounce
     };
 
     const channel = supabase

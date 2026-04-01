@@ -5,6 +5,8 @@ import FinalResults from "@/components/room/FinalResults";
 import Gameplay from "@/components/room/Gameplay";
 import RoomRealtime from "@/components/room/RoomRealtime";
 
+export const dynamic = 'force-dynamic'; // Desativa o cache do Next.js para os dados do Prisma
+
 export default async function RoomPage({
   params,
 }: {
@@ -41,28 +43,16 @@ export default async function RoomPage({
 
   const currentRound = room.rounds[0];
 
-  if (room.status === "WAITING") {
-    return (
-      <>
-        <RoomRealtime roomId={room.id} />
-        <WaitingLobby room={room} />
-      </>
-    );
-  }
-
-  if (room.status === "FINISHED") {
-    return (
-      <>
-        <RoomRealtime roomId={room.id} />
-        <FinalResults room={room} />
-      </>
-    );
-  }
-
   return (
     <>
       <RoomRealtime roomId={room.id} />
-      <Gameplay room={room} currentRound={currentRound} />
+      {room.status === "WAITING" ? (
+        <WaitingLobby room={room} />
+      ) : room.status === "FINISHED" ? (
+        <FinalResults room={room} />
+      ) : (
+        <Gameplay room={room} currentRound={currentRound} />
+      )}
     </>
   );
 }
