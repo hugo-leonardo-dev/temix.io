@@ -48,15 +48,31 @@ export async function POST(
       );
     }
 
-    const theme = await prisma.theme.create({
-      data: {
-        title: "First Round Theme",
-        description: "Submit your best content!",
-        category: room.allowedCategories[0],
-        isSystem: false,
-        roomId: room.id,
-      },
-    });
+    const body = await request.json();
+    const customThemes = body.customThemes;
+
+    if (!customThemes || !Array.isArray(customThemes) || customThemes.length !== room.totalRounds) {
+      return NextResponse.json(
+        { error: "Please provide a theme for every round." },
+        { status: 400 },
+      );
+    }
+
+    // Criar todos os temas configurados pelo host
+    const createdThemes = [];
+    for (const themeTitle of customThemes) {
+      const theme = await prisma.theme.create({
+        data: {
+          title: themeTitle,
+          category: room.allowedCategories[0],
+          isSystem: false,
+          roomId: room.id,
+        },
+      });
+      createdThemes.push(theme);
+    }
+
+    const firstTheme = createdThemes[0];
 
     const [updatedRoom] = await prisma.$transaction([
       prisma.room.update({
@@ -67,7 +83,7 @@ export async function POST(
         data: {
           roomId: room.id,
           roundNumber: 1,
-          themeId: theme.id,
+          themeId: firstTheme.id,
           status: "SUBMITTING",
           startedAt: new Date(),
         },

@@ -25,6 +25,8 @@ export default function WaitingLobby({ room }: { room: any }) {
   const [copied, setCopied] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [themes, setThemes] = useState<string[]>(Array(room.totalRounds).fill(""));
 
   const isHost = session?.user?.id === room.creatorId;
   const canStart = room.players.length >= 2;
@@ -35,13 +37,25 @@ export default function WaitingLobby({ room }: { room: any }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleStartGameClick = () => {
+    setShowThemeModal(true);
+  };
+
   const startGame = async () => {
+    // Valida se todos os temas foram preenchidos
+    if (themes.some(t => t.trim() === "")) {
+      setError("Please fill in all round themes before starting.");
+      return;
+    }
+
     setIsStarting(true);
     setError(null);
 
     try {
       const response = await fetch(`/api/rooms/${room.id}/start`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customThemes: themes }),
       });
 
       const data = await response.json();
@@ -50,7 +64,6 @@ export default function WaitingLobby({ room }: { room: any }) {
         throw new Error(data.error || "Failed to start game");
       }
 
-      // Recarregar a página ou redirecionar para o estado de jogo
       router.refresh();
     } catch (err) {
       const errorMessage =
@@ -155,7 +168,7 @@ export default function WaitingLobby({ room }: { room: any }) {
           </div>
         </Card>
 
-        {error && (
+        {error && !showThemeModal && (
           <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
             <p className="text-red-400 text-sm text-center">{error}</p>
           </div>
@@ -166,21 +179,12 @@ export default function WaitingLobby({ room }: { room: any }) {
             <div className="space-y-3">
               <Button
                 size="lg"
-                onClick={startGame}
+                onClick={handleStartGameClick}
                 disabled={!canStart || isStarting}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25 px-8"
               >
-                {isStarting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-5 w-5" />
-                    Start Game
-                  </>
-                )}
+                <Play className="mr-2 h-5 w-5" />
+                Configure Themes & Start
               </Button>
               {!canStart && (
                 <p className="text-sm text-zinc-500">
@@ -194,6 +198,63 @@ export default function WaitingLobby({ room }: { room: any }) {
             </p>
           )}
         </div>
+
+        {/* Modal de Temas Customizados */}
+        {showThemeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-white mb-2">Set Round Themes</h2>
+              <p className="text-zinc-400 mb-6 text-sm">
+                As the host, you need to define the theme for each of the {room.totalRounds} rounds before starting.
+              </p>
+              
+              {error && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4 mb-8">
+                {themes.map((theme, index) => (
+                  <div key={index}>
+                    <label className="block text-xs font-semibold text-zinc-400 mb-1 uppercase tracking-wider">
+                      Round {index + 1} Theme
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder={`E.g., "Your favorite childhood memory"`}
+                      value={theme}
+                      onChange={(e) => {
+                        const newThemes = [...themes];
+                        newThemes[index] = e.target.value;
+                        setThemes(newThemes);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => { setShowThemeModal(false); setError(null); }}
+                  disabled={isStarting}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                  onClick={startGame}
+                  disabled={isStarting}
+                >
+                  {isStarting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Start Game"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

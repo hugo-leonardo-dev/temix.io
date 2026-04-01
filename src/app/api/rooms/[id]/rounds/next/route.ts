@@ -47,34 +47,17 @@ export async function POST(
       return NextResponse.json({ success: true, isGameFinished: true });
     }
 
-    // Selecionar um tema que não foi usado
-    const usedThemeIds = room.rounds.map((r) => r.themeId);
-    let availableThemes = await prisma.theme.findMany({
-      where: {
-        isSystem: true,
-        category: { in: room.allowedCategories },
-        id: { notIn: usedThemeIds },
-      },
+    // Pegar os temas criados pelo host para esta sala
+    const roomThemes = await prisma.theme.findMany({
+      where: { roomId: room.id, isSystem: false },
+      orderBy: { createdAt: 'asc' }, // Assegura a extração na mesma ordem criada
     });
 
-    // Fallback: se acabarem os temas para as categorias da sala, pega qualquer tema não usado
-    if (availableThemes.length === 0) {
-      availableThemes = await prisma.theme.findMany({
-        where: {
-          isSystem: true,
-          id: { notIn: usedThemeIds },
-        },
-      });
-    }
-    
-    // Se realmente acabou os temas, repete um aleatório
-    if (availableThemes.length === 0) {
-       availableThemes = await prisma.theme.findMany({
-        where: { isSystem: true },
-      });
-    }
+    const nextTheme = roomThemes[currentRoundNumber];
 
-    const nextTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
+    if (!nextTheme) {
+      return NextResponse.json({ error: "No theme configured for this round." }, { status: 400 });
+    }
 
     // Criar a próxima rodada
     const newRound = await prisma.round.create({
