@@ -464,6 +464,7 @@ export default function CreateRoom() {
                 onClick={() => setCurrentStep((prev) => prev + 1)}
                 disabled={!canProceed() || isLoading}
                 className="flex-1"
+                data-testid="next-step"
               >
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
