@@ -71,7 +71,7 @@ export default function WaitingLobby({ room }: { room: any }) {
   };
 
   return (
-    <div className="waiting-root min-h-screen">
+    <div className="waiting-root">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Room title + code */}
         <div className="waiting-header">

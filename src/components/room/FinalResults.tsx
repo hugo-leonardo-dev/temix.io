@@ -40,7 +40,7 @@ export default function FinalResults({ room }: { room: any }) {
   ];
 
   return (
-    <div className="final-results-root min-h-screen">
+    <div className="final-results-root">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         {/* Header */}
         <div className="final-results-header">

@@ -101,6 +101,7 @@ export default async function Home() {
               </span>
             </h1>
           </div>
+          <RoomActions />
         </div>
 
         {/* Quick stats */}
@@ -187,7 +188,6 @@ export default async function Home() {
           <p className="text-zinc-400 mb-8 max-w-md">
             Create your first room or join someone else's game
           </p>
-          <RoomActions />
         </div>
       )}
     </div>

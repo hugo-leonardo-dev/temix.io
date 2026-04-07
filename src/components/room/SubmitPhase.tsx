@@ -256,7 +256,7 @@ export default function SubmitPhase({
   const submitCount = Math.floor((round.responses?.length || 0) / categories.length);
 
   return (
-    <div className="min-h-screen">
+    <div>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Submitted banner */}
         {submitted && (

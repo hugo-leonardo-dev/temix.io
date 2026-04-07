@@ -390,6 +390,7 @@
     0 6px 24px oklch(0.45 0.15 275 / 35%),
     0 0 60px oklch(0.55 0.2 320 / 18%) !important;
   transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 .btn-primary:active:not(:disabled) {
@@ -402,9 +403,8 @@
 
 /* Secundary button */
 .btn-secondary {
-  width: auto !important; /* 👈 ESSENCIAL */
-  padding: 0 1rem !important; /* controla o tamanho horizontal */
-
+  width: auto !important;
+  padding: 0 0.75rem !important;
   background: linear-gradient(
     135deg,
     oklch(0.55 0.2 320),
@@ -412,7 +412,7 @@
   ) !important;
   color: oklch(0.98 0.005 250) !important;
   font-weight: 600 !important;
-  height: 3.25rem !important;
+  height: 2.75rem !important;
   border-radius: 0.75rem !important;
   border: 1px solid oklch(0.65 0.18 275 / 30%) !important;
   box-shadow:
@@ -425,14 +425,16 @@
 .btn-secondary:hover:not(:disabled) {
   background: linear-gradient(
     135deg,
-    oklch(0.55 0.2 320),
-    oklch(0.55 0.18 350)
+    oklch(0.6 0.2 320),
+    oklch(0.6 0.18 350)
   ) !important;
   color: oklch(0.98 0.005 250) !important;
   border: 1px solid oklch(0.65 0.18 275 / 30%) !important;
   box-shadow:
-    0 4px 16px oklch(0.45 0.15 275 / 25%),
-    0 0 40px oklch(0.55 0.2 320 / 10%) !important;
+    0 6px 24px oklch(0.45 0.15 275 / 35%),
+    0 0 60px oklch(0.55 0.2 320 / 18%) !important;
+  transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 /* active */
@@ -484,6 +486,9 @@
   border-style: solid !important;
   background: oklch(0.22 0.02 260 / 80%) !important;
   border-color: oklch(0.35 0.02 260) !important;
+  box-shadow: 0 4px 16px oklch(0.45 0.15 275 / 35%) !important;
+  transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 /* Error box */
@@ -579,8 +584,9 @@
 }
 
 .btn-play:hover {
-  box-shadow: 0 4px 20px oklch(0.45 0.15 275 / 35%) !important;
+  box-shadow: 0 6px 24px oklch(0.45 0.15 275 / 35%) !important;
   transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 /* User avatar button */
@@ -718,11 +724,30 @@
   color: oklch(0.98 0.005 250) !important;
   border-radius: 0.75rem !important;
   box-shadow: 0 2px 12px oklch(0.45 0.15 275 / 20%) !important;
+  cursor: pointer;
+}
+
+.sheet-btn-create:hover {
+  background: linear-gradient(
+    135deg,
+    oklch(0.6 0.2 320),
+    oklch(0.55 0.15 340)
+  ) !important;
+  box-shadow: 0 4px 20px oklch(0.45 0.15 275 / 35%) !important;
+  transform: translateY(-1px) !important;
 }
 
 .sheet-btn-join {
   border-radius: 0.75rem !important;
   border-color: oklch(0.28 0.02 260) !important;
+  cursor: pointer;
+}
+
+.sheet-btn-join:hover {
+  border-color: oklch(0.35 0.02 260) !important;
+  background: oklch(0.22 0.02 260 / 80%) !important;
+  box-shadow: 0 4px 16px oklch(0.45 0.15 275 / 25%) !important;
+  transform: translateY(-1px) !important;
 }
 
 .sheet-btn-logout {
@@ -763,6 +788,7 @@
 .btn-join-confirm:hover:not(:disabled) {
   box-shadow: 0 4px 20px oklch(0.45 0.15 275 / 35%) !important;
   transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 /* ─── Home Stats Cards ─── */
@@ -1314,6 +1340,9 @@
 .wait-modal-cancel:hover {
   background: oklch(0.24 0.02 260 / 80%) !important;
   color: oklch(0.95 0.01 250) !important;
+  box-shadow: 0 4px 16px oklch(0.45 0.15 275 / 25%) !important;
+  transform: translateY(-1px) !important;
+  cursor: pointer;
 }
 
 /* ─── Round Results ─── */

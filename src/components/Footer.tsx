@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
         <p>
           Made with 💜 by{" "}
-          <strong className="text-foreground">Temix Team</strong>
+          <strong className="text-foreground">Hugo Leonardo</strong>
         </p>
       </div>
     </footer>

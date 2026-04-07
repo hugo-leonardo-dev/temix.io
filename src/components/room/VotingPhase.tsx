@@ -81,7 +81,7 @@ export default function VotingPhase({
 
   if (hasVoted) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col items-center justify-center p-4">
         <Badge variant="secondary" className="mb-4">Round {round.roundNumber} - Voted</Badge>
         <div className="bg-zinc-900/80 border border-zinc-800 p-8 rounded-2xl max-w-md w-full text-center shadow-xl">
           <Clock className="w-16 h-16 text-purple-500 mx-auto mb-6 animate-pulse" />
@@ -95,7 +95,7 @@ export default function VotingPhase({
   }
 
   return (
-    <div className="min-h-screen  ">
+    <div>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <Badge variant="secondary" className="mb-4">

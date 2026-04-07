@@ -15,7 +15,7 @@ export default async function GamePlay({
 
   if (!currentRound) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
         <p className="text-zinc-400">Loading round...</p>
       </div>
     );

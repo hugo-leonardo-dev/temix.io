@@ -47,7 +47,7 @@ export default function RoundResults({
   };
 
   return (
-    <div className="results-root min-h-screen">
+    <div className="results-root">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Header */}
         <div className="results-header">
