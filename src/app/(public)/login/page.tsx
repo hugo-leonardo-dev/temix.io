@@ -1,22 +1,12 @@
-// src/app/login/page.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  AlertCircle,
-} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Gamepad2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Login() {
@@ -27,7 +17,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -47,7 +37,7 @@ export default function Login() {
 
       router.push("/");
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("Erro ao fazer login. Tente novamente.");
       setLoading(false);
     }
@@ -59,155 +49,166 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-purple-950/20 to-zinc-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-            Temix.io
+    <div className="login-root min-h-screen flex items-center justify-center p-4 overflow-hidden relative">
+      {/* Animated mesh blobs */}
+      <div className="blob blob-1" />
+      <div className="blob blob-2" />
+      <div className="blob blob-3" />
+
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 login-grid" />
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center mb-4">
+            <div className="logo-icon-wrapper relative">
+              <div className="logo-icon-glow" />
+              <Gamepad2 className="logo-icon relative z-10" />
+            </div>
+          </div>
+          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-pink-400 gradient-shift">
+            Temix
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">
+              .io
+            </span>
           </h1>
         </div>
 
-        <Card className="bg-zinc-900/80 backdrop-blur-xl border-zinc-800 shadow-2xl shadow-purple-500/10 p-8">
-          <div className="mb-2">
-            <h2 className="text-2xl font-bold text-zinc-100 mb-1">
-              Welcome back
-            </h2>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-400 text-sm">{error}</p>
+        {/* Card */}
+        <div className="login-card">
+          <div className="card-inner">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-zinc-100">Welcome back</h2>
+              <p className="text-zinc-500 text-sm mt-1">
+                Sign in to jump into the game
+              </p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <Label htmlFor="email" className="text-zinc-300">
-                Email
-              </Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-                <Input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500"
-                  required
-                  disabled={loading}
-                />
+            {error && (
+              <div className="error-box">
+                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+                <p className="text-red-400 text-sm">{error}</p>
               </div>
-            </div>
+            )}
 
-            <div>
-              <Label htmlFor="password" className="text-zinc-300">
-                Password
-              </Label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-10 pr-12 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-purple-500"
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition"
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <Label htmlFor="email" className="input-label">
+                  Email
+                </Label>
+                <div className="relative mt-2">
+                  <Mail className="input-icon" />
+                  <Input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="input-field pl-10"
+                    required
+                    disabled={loading}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
-                  disabled={loading}
-                />
-                <span className="text-zinc-400 group-hover:text-zinc-300 transition">
-                  Remember me
-                </span>
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-purple-400 hover:text-purple-300 font-medium transition"
+              <div>
+                <Label htmlFor="password" className="input-label">
+                  Password
+                </Label>
+                <div className="relative mt-2">
+                  <Lock className="input-icon" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-field pl-10 pr-12"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    disabled={loading}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    className="custom-checkbox"
+                    disabled={loading}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <Link href="/forgot-password" className="link-forgot">
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="btn-primary"
+                size="lg"
               >
-                Forgot password?
-              </Link>
+                <span>{loading ? "Signing in..." : "Sign In"}</span>
+              </Button>
+            </form>
+
+            <div className="divider">
+              <span>or continue with</span>
             </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25 text-white font-semibold"
-              size="lg"
-            >
-              <LogIn className="mr-2 h-5 w-5" />
-              {loading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-zinc-800"></div>
-            <span className="text-zinc-500 text-sm">or continue with</span>
-            <div className="flex-1 h-px bg-zinc-800"></div>
-          </div>
-
-          <div className="space-y-3">
             <Button
               onClick={() => handleSocialLogin("google")}
               disabled={loading}
-              variant="outline"
-              className="w-full border-zinc-700 hover:bg-zinc-800 hover:border-zinc-600"
+              className="btn-google"
               size="lg"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#EA4335"
+                  d="M5.27 9.76A7.18 7.18 0 0 1 12 4.84c1.72 0 3.27.59 4.5 1.57l3.39-3.39C17.78 1.19 15.07 0 12 0 7.27 0 3.2 2.7 1.24 6.65l4.03 3.11Z"
                 />
                 <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                  d="M16.17 17.08A6.83 6.83 0 0 1 12 18.32c-4.08 0-7.5-2.74-8.57-6.46l-4.03 3.11C1.2 18.87 6.19 22.56 12 22.56c3.04 0 5.6-1.01 7.35-2.72l-3.18-2.76Z"
                 />
                 <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#4A90D9"
+                  d="M19.35 19.84C21.3 17.94 22.56 15.13 22.56 11.68c0-.74-.07-1.45-.19-2.16H12v4.64h5.92a5.13 5.13 0 0 1-2.08 3.04l3.18 2.76Z"
                 />
                 <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#FBBC05"
+                  d="M3.43 11.88a7.3 7.3 0 0 1 0-3.66L-6.9-7.94Zm4.79-7.83-4.03-1.8A7.11 7.11 0 0 0 2.18 5.54l4.03 3.11A7.11 7.11 0 0 1 8.22 2.05Z"
                 />
               </svg>
               Continue with Google
             </Button>
-          </div>
 
-          <p className="text-center text-zinc-400 mt-6">
-            Don't have an account?{" "}
-            <Link
-              href="/register"
-              className="text-purple-400 hover:text-purple-300 font-semibold transition"
-            >
-              Create account
-            </Link>
-          </p>
-        </Card>
+            <p className="register-link">
+              Don't have an account?{" "}
+              <Link href="/register" className="register-link-a">
+                Create account
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

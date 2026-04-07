@@ -9,7 +9,7 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-blue-950/20 to-zinc-950 antialiased ">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-[#140d22] to-zinc-950 antialiased relative">
       <SessionProvider>
         <Header />
 

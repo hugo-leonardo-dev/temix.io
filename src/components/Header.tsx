@@ -28,7 +28,17 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Plus, LogIn, Loader2, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  LogIn,
+  Loader2,
+  ChevronDown,
+  Gamepad2,
+  Sparkles,
+  User,
+  LogOut,
+  PanelsTopLeft,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
@@ -61,7 +71,6 @@ export default function Header() {
         throw new Error(data.error || "Failed to join room");
       }
 
-      // Redirecionar para a sala
       router.push(`/rooms/${data.room.id}`);
       setIsJoinDialogOpen(false);
       setRoomCode("");
@@ -74,34 +83,40 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <header className="header-root">
+        <div className="header-container">
+          {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-1 font-black text-xl tracking-tight"
+            className="header-logo"
           >
-            <span className="text-primary">Temix</span>
-            <span className="text-muted-foreground">.io</span>
+            <Gamepad2 className="h-5 w-5" />
+            <span className="header-logo-text">
+              Temix<span className="text-muted-foreground">.io</span>
+            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
+          {/* Desktop Nav */}
+          <nav className="header-nav hidden md:flex items-center gap-4">
+            {/* Play dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="shadow-lg shadow-primary/20">
+                <Button className="btn-play">
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Play
-                  <ChevronDown className="ml-2 h-4 w-4" />
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="dropdown-menu">
                 <DropdownMenuItem asChild>
-                  <Link href="/rooms/create" className="cursor-pointer">
+                  <Link href="/rooms/create" className="dropdown-item">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Room
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setIsJoinDialogOpen(true)}
-                  className="cursor-pointer"
+                  className="dropdown-item"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   Join Room
@@ -109,38 +124,45 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* User avatar + dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full border border-border bg-card p-1 transition hover:bg-accent">
-                  <Avatar className="h-8 w-8">
+                <button className="user-avatar-btn">
+                  <Avatar className="user-avatar">
                     <AvatarImage src={session?.user?.image ?? ""} />
-                    <AvatarFallback className="bg-muted text-foreground">
+                    <AvatarFallback className="text-foreground bg-primary/20">
                       {session?.user?.name?.[0] ?? "U"}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="user-name hidden lg:inline">
+                    {session?.user?.name ?? "User"}
+                  </span>
+                  <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground hidden lg:block" />
                 </button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent
-                align="end"
-                className="w-40 border-border bg-popover"
-              >
+              <DropdownMenuContent align="end" className="dropdown-menu">
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard">Profile</Link>
+                  <Link href="/dashboard" className="dropdown-item">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="dropdown-separator" />
 
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
+                  className="dropdown-item-destructive"
                   onClick={() => signOut({ callbackUrl: "/login" })}
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>
 
+          {/* Mobile hamburger */}
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -148,32 +170,26 @@ export default function Header() {
                 variant="ghost"
                 className="md:hidden text-muted-foreground hover:text-foreground"
               >
-                ☰
+                <PanelsTopLeft className="h-5 w-5" />
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="border-border bg-background">
-              <SheetHeader className="mb-6 text-lg font-black tracking-tight">
-                <span className="text-primary">Temix</span>
-                <span className="text-muted-foreground">.io</span>
+            <SheetContent side="right" className="sheet-root">
+              <SheetHeader className="sheet-header">
+                <span className="text-primary font-bold text-xl">Temix</span>
+                <span className="text-muted-foreground text-xl">.io</span>
               </SheetHeader>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 mt-6">
                 <Link
                   href="/dashboard"
-                  className="font-medium text-muted-foreground transition hover:text-foreground"
+                  className="sheet-link"
                 >
-                  Profile
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
                 </Link>
 
-                <Link
-                  href="/rooms"
-                  className="font-medium text-muted-foreground transition hover:text-foreground"
-                >
-                  Rooms
-                </Link>
-
-                <Button asChild>
+                <Button asChild className="sheet-btn-create">
                   <Link href="/rooms/create">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Room
@@ -183,25 +199,34 @@ export default function Header() {
                 <Button
                   variant="outline"
                   onClick={() => setIsJoinDialogOpen(true)}
+                  className="sheet-btn-join"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   Join Room
                 </Button>
 
+                <div className="border-t border-border my-2" />
+
                 <Button
                   variant="destructive"
                   onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="sheet-btn-logout"
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </Button>
               </div>
             </SheetContent>
           </Sheet>
         </div>
+
+        {/* Bottom glow bar */}
+        <div className="header-glow" />
       </header>
 
+      {/* Join Room Dialog */}
       <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="dialog-root sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Join a Room</DialogTitle>
             <DialogDescription>
@@ -221,7 +246,7 @@ export default function Header() {
                   setError(null);
                 }}
                 maxLength={7}
-                className="text-center text-xl font-bold tracking-wider"
+                className="dialog-input"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -247,7 +272,7 @@ export default function Header() {
               </Button>
               <Button
                 onClick={handleJoinRoom}
-                className="flex-1"
+                className="flex-1 btn-join-confirm"
                 disabled={isLoading || !roomCode.trim()}
               >
                 {isLoading ? (
