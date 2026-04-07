@@ -80,9 +80,6 @@ export default function Login() {
           <div className="card-inner">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-zinc-100">Welcome back</h2>
-              <p className="text-zinc-500 text-sm mt-1">
-                Sign in to jump into the game
-              </p>
             </div>
 
             {error && (

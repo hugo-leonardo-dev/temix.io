@@ -3,6 +3,10 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata = {
   title: "Temix.io",
+  icons: {
+    icon: "/gamepad-2.ico",
+    shortcut: "/gamepad-2.ico",
+  },
 };
 
 export default function RootLayout({

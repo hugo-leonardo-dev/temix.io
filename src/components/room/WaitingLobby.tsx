@@ -25,7 +25,9 @@ export default function WaitingLobby({ room }: { room: any }) {
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showThemeModal, setShowThemeModal] = useState(false);
-  const [themes, setThemes] = useState<string[]>(Array(room.totalRounds).fill(""));
+  const [themes, setThemes] = useState<string[]>(
+    Array(room.totalRounds).fill(""),
+  );
 
   const isHost = session?.user?.id === room.creatorId;
   const canStart = room.players.length >= 2;
@@ -75,9 +77,13 @@ export default function WaitingLobby({ room }: { room: any }) {
         <div className="waiting-header">
           <div>
             <h1 className="waiting-title">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-pink-400 gradient-shift">{room.name}</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-pink-400 gradient-shift">
+                {room.name}
+              </span>
             </h1>
-            <p className="text-muted-foreground text-sm">Room ready for players</p>
+            <p className="text-muted-foreground text-sm">
+              Room ready for players
+            </p>
           </div>
 
           <div className="waiting-code-wrapper">
@@ -121,8 +127,11 @@ export default function WaitingLobby({ room }: { room: any }) {
               <ThumbsUp className="h-5 w-5" />
             </div>
             <div className="text-2xl font-bold text-zinc-100 waiting-stat-votes">
-              +{room.upvotesPerPlayer}<span className="text-zinc-600">/</span>
-              <span className="text-sm text-red-400">{room.downvotesPerPlayer}</span>
+              +{room.upvotesPerPlayer}
+              <span className="text-zinc-600">/</span>
+              <span className="text-sm text-red-400">
+                {room.downvotesPerPlayer}
+              </span>
             </div>
             <div className="waiting-stat-label">
               <span className="text-green-400 text-xs">up</span>
@@ -148,10 +157,7 @@ export default function WaitingLobby({ room }: { room: any }) {
             {room.players.map((player: any, index: number) => {
               const isHostPlayer = player.playerId === room.creatorId;
               return (
-                <div
-                  key={player.id}
-                  className="waiting-player-item"
-                >
+                <div key={player.id} className="waiting-player-item">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={

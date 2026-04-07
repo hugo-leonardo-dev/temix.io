@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import { Gamepad2, Clock, Trophy, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Clock, Trophy, Sparkles, Plus } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import RoomCard from "@/components/RoomCard";
+import RoomActions from "@/components/RoomActions";
 
 const statusGroups = {
   WAITING: { label: "Waiting Room", icon: Clock, accent: "amber" },
@@ -100,15 +101,6 @@ export default async function Home() {
               </span>
             </h1>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Button asChild className="btn-join-confirm hover:!scale-[1.02]">
-              <Link href="/rooms/create">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Room
-              </Link>
-            </Button>
-          </div>
         </div>
 
         {/* Quick stats */}
@@ -125,9 +117,7 @@ export default async function Home() {
               >
                 <Icon className="home-stat-icon" />
                 <div>
-                  <div className="text-xl font-bold text-zinc-100">
-                    {count}
-                  </div>
+                  <div className="text-xl font-bold text-zinc-100">{count}</div>
                   <div className="text-[0.688rem] text-zinc-500 font-medium uppercase tracking-wide">
                     {config.label}
                   </div>
@@ -191,23 +181,13 @@ export default async function Home() {
       ) : (
         /* Empty state */
         <div className="home-empty-state">
-          <div className="home-empty-icon">
-            <Sparkles className="h-12 w-12 text-violet-400" />
-          </div>
           <h3 className="text-2xl font-bold text-zinc-200 mb-3">
             No rooms yet
           </h3>
           <p className="text-zinc-400 mb-8 max-w-md">
             Create your first room or join someone else's game
           </p>
-          <div className="flex items-center gap-4 flex-wrap justify-center">
-            <Button asChild className="btn-primary" size="lg">
-              <Link href="/rooms/create">
-                <Plus className="mr-2 h-5 w-5" />
-                Create Room
-              </Link>
-            </Button>
-          </div>
+          <RoomActions />
         </div>
       )}
     </div>

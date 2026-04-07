@@ -104,9 +104,6 @@ export default function RegisterPage() {
               <h2 className="text-2xl font-bold text-zinc-100">
                 Join the game
               </h2>
-              <p className="text-zinc-500 text-sm mt-1">
-                Create your account to get started
-              </p>
             </div>
 
             {error && (
