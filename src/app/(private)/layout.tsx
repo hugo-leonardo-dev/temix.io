@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import DashboardRealtime from "@/components/DashboardRealtime";
 import "../globals.css";
 import { SessionProvider } from "next-auth/react";
 
@@ -11,6 +12,7 @@ export default function PrivateLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-[#140d22] to-zinc-950 antialiased relative">
       <SessionProvider>
+        <DashboardRealtime />
         <Header />
 
         <main className="flex-1 pb-12 md:pb-16 container mx-auto px-4 py-8 space-y-8">

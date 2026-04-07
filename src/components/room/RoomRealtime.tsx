@@ -18,7 +18,7 @@ export default function RoomRealtime({ roomId }: { roomId: string }) {
         startTransition(() => {
           router.refresh();
         });
-      }, 300); // 300ms debounce
+      }, 1000); // 1s debounce
     };
 
     const channel = supabase

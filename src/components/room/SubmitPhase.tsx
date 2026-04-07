@@ -84,28 +84,35 @@ export default function SubmitPhase({
 
   const categories = room.allowedCategories || [];
 
-  // Inicializar respostas vazias para cada categoria
-  useEffect(() => {
-    const initialResponses: Record<string, CategoryResponse> = {};
-    categories.forEach((cat: string) => {
-      initialResponses[cat] = {
-        category: cat,
-        content: "",
-        mediaUrl: "",
-      };
-    });
-    setResponses(initialResponses);
-  }, [categories]);
-
-  // Verificar se já submeteu
+  // Initialize responses: empty or pre-filled from existing submissions
   useEffect(() => {
     const userResponses = round.responses?.filter(
-      (r: any) => r.playerId === room.currentUserId,
+      (r: any) => r.authorId === room.currentUserId,
     );
+
+    const initialResponses: Record<string, CategoryResponse> = {};
+    categories.forEach((cat: string) => {
+      const existing = userResponses?.find((r: any) => r.category === cat);
+      if (existing) {
+        initialResponses[cat] = {
+          category: existing.category,
+          content: existing.content || "",
+          mediaUrl: existing.mediaUrl || "",
+        };
+      } else {
+        initialResponses[cat] = {
+          category: cat,
+          content: "",
+          mediaUrl: "",
+        };
+      }
+    });
+    setResponses(initialResponses);
+
     if (userResponses && userResponses.length > 0) {
       setSubmitted(true);
     }
-  }, [round.responses, room.currentUserId]);
+  }, [categories, round.responses, room.currentUserId]);
 
   const updateResponse = (
     category: string,
@@ -246,33 +253,33 @@ export default function SubmitPhase({
     }
   };
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="bg-zinc-900/50 border-zinc-800 p-8 text-center max-w-md">
-          <div className="mb-4">
-            <div className="h-16 w-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-              <Send className="h-8 w-8 text-green-400" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-zinc-100 mb-2">
-            All Responses Submitted!
-          </h2>
-          <p className="text-zinc-400 mb-4">
-            Waiting for other players to submit...
-          </p>
-          <div className="text-sm text-zinc-500">
-            {Math.floor((round.responses?.length || 0) / categories.length)}/
-            {room.players.length} players submitted
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const submitCount = Math.floor((round.responses?.length || 0) / categories.length);
 
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Submitted banner */}
+        {submitted && (
+          <Card className="bg-emerald-500/10 border-emerald-500/20 p-4 mb-8">
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <Send className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-emerald-300 text-sm">
+                  Responses submitted
+                </h3>
+                <p className="text-emerald-400/70 text-xs">
+                  Waiting for other players... You can edit your answers below.
+                </p>
+              </div>
+            </div>
+            <div className="text-sm text-zinc-500 mt-3 text-center">
+              {submitCount}/{room.players.length} players submitted
+            </div>
+          </Card>
+        )}
+
         <div className="text-center mb-8">
           <Badge variant="secondary" className="mb-4">
             Round {round.roundNumber} of {room.totalRounds}
@@ -296,7 +303,7 @@ export default function SubmitPhase({
           <div className="flex items-center justify-center gap-2 mt-4 text-zinc-500">
             <Clock className="h-4 w-4" />
             <span className="text-sm">
-              Submit responses for all {categories.length} categories
+              {submitted ? "Edit your responses below" : `Submit responses for all ${categories.length} categories`}
             </span>
           </div>
         </div>
@@ -504,12 +511,12 @@ export default function SubmitPhase({
           {loading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Submitting All Responses...
+              {submitted ? "Updating Responses..." : "Submitting All Responses..."}
             </>
           ) : (
             <>
               <Send className="mr-2 h-5 w-5" />
-              Submit All Responses
+              {submitted ? "Update Responses" : "Submit All Responses"}
             </>
           )}
         </Button>
