@@ -58,7 +58,8 @@ export async function POST(
           data: {
             type: v.voteType,
             voterId: session.user.id,
-            responseId: v.responseId
+            responseId: v.responseId,
+            roomId: roomId, // Relaciona com a sala para o Realtime
           }
         });
         

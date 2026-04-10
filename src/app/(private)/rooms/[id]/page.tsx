@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import WaitingLobby from "@/components/room/WaitingLobby";
 import FinalResults from "@/components/room/FinalResults";
 import Gameplay from "@/components/room/Gameplay";
-import RoomRealtime from "@/components/room/RoomRealtime";
+import { RoomProvider } from "@/components/room/RoomContext";
 
-export const dynamic = 'force-dynamic'; // Desativa o cache do Next.js para os dados do Prisma
+export const dynamic = "force-dynamic";
 
 export default async function RoomPage({
   params,
@@ -44,8 +44,7 @@ export default async function RoomPage({
   const currentRound = room.rounds[0];
 
   return (
-    <>
-      <RoomRealtime roomId={room.id} />
+    <RoomProvider initialData={room}>
       {room.status === "WAITING" ? (
         <WaitingLobby room={room} />
       ) : room.status === "FINISHED" ? (
@@ -53,6 +52,6 @@ export default async function RoomPage({
       ) : (
         <Gameplay room={room} currentRound={currentRound} />
       )}
-    </>
+    </RoomProvider>
   );
 }

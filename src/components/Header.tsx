@@ -23,6 +23,8 @@ import {
   User,
   LogOut,
   PanelsTopLeft,
+  TrendingUp,
+  Settings,
 } from "lucide-react";
 
 export default function Header() {
@@ -63,9 +65,15 @@ export default function Header() {
 
             <DropdownMenuContent align="end" className="dropdown-menu">
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="dropdown-item">
+                <Link href="/profile" className="dropdown-item">
                   <User className="mr-2 h-4 w-4" />
                   Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/profile/settings" className="dropdown-item">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
                 </Link>
               </DropdownMenuItem>
 
@@ -102,11 +110,19 @@ export default function Header() {
 
             <div className="flex flex-col gap-4 mt-6">
               <Link
-                href="/dashboard"
+                href="/profile"
                 className="sheet-link"
               >
                 <User className="h-4 w-4" />
                 <span>Profile</span>
+              </Link>
+
+              <Link
+                href="/profile/settings"
+                className="sheet-link"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
               </Link>
 
               <div className="border-t border-border my-2" />

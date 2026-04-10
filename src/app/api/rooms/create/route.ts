@@ -8,7 +8,7 @@ import { z } from "zod";
 const createRoomSchema = z.object({
   name: z.string().min(3, "Room name must be at least 3 characters"),
   maxPlayers: z.number().min(2).max(20),
-  totalRounds: z.number().min(3).max(15),
+  totalRounds: z.number().min(1).max(15),
   upvotesPerPlayer: z.number().min(1).max(10),
   downvotesPerPlayer: z.number().min(0).max(5),
   allowedCategories: z.array(z.nativeEnum(Category)).min(1, "At least one category must be selected"),

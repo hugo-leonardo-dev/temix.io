@@ -64,6 +64,7 @@ export async function POST(
           update: {
             content: resData.content?.trim() || "",
             mediaUrl: resData.mediaUrl?.trim() || null,
+            roomId: roomId, // Garante que o roomId esteja presente
           },
           create: {
             content: resData.content?.trim() || "",
@@ -71,6 +72,7 @@ export async function POST(
             category: resData.category as Category,
             roundId: round.id,
             authorId: session.user.id,
+            roomId: roomId, // Relaciona com a sala para o Realtime
           },
         });
       }

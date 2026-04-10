@@ -1,31 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id            String    @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String
-  email         String    @unique
+  email         String       @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  points        Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts     Account[]
-  sessions     Session[]
-  createdRooms Room[]       @relation("RoomCreator")
-  participants RoomPlayer[]
-  responses    Response[]
-  votes        Vote[]
-  medals       Medal[]
+  points        Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  accounts      Account[]
+  medals        Medal[]
+  responses     Response[]
+  participants  RoomPlayer[]
+  createdRooms  Room[]       @relation("RoomCreator")
+  sessions      Session[]
+  votes         Vote[]
 
   @@map("users")
 }
@@ -36,15 +35,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -68,97 +66,71 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
 model Medal {
-  id        String     @id @default(cuid())
+  id        String    @id @default(cuid())
   type      MedalType
-  createdAt DateTime   @default(now())
-
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
   userId    String
-
-  room      Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId    String
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("medals")
 }
 
-enum MedalType {
-  FIRST_PLACE
-  SECOND_PLACE
-  THIRD_PLACE
-}
 model Room {
-  id          String      @id @default(cuid())
-  name        String
-  code        String      @unique  
-  maxPlayers  Int         @default(6)
-  status      RoomStatus  @default(WAITING)
-
-  upvotesPerPlayer   Int      @default(3)          
-  downvotesPerPlayer Int      @default(1)          
-  
+  id                 String       @id @default(cuid())
+  name               String
+  code               String       @unique
+  maxPlayers         Int          @default(6)
+  status             RoomStatus   @default(WAITING)
+  upvotesPerPlayer   Int          @default(3)
+  downvotesPerPlayer Int          @default(1)
   allowedCategories  Category[]
-  totalRounds        Int      @default(7)
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  creator     User        @relation("RoomCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  creatorId   String
-
-  players     RoomPlayer[]
-  rounds      Round[]
-  themes      Theme[]
-  medals      Medal[]
+  totalRounds        Int          @default(1)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  creatorId          String
+  medals             Medal[]
+  responses          Response[]
+  players            RoomPlayer[]
+  creator            User         @relation("RoomCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  rounds             Round[]
+  themes             Theme[]
+  votes              Vote[]
 
   @@map("rooms")
 }
 
-enum RoomStatus {
-  WAITING
-  PLAYING
-  FINISHED
-}
-
 model RoomPlayer {
-  id        String   @id @default(cuid())
-  score     Int      @default(0)
-  joinedAt  DateTime @default(now())
-
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId    String
-
-  player    User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  playerId  String
+  id       String   @id @default(cuid())
+  score    Int      @default(0)
+  joinedAt DateTime @default(now())
+  roomId   String
+  playerId String
+  player   User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, playerId])
   @@map("room_players")
 }
 
 model Round {
-  id            String      @id @default(cuid())
-  roundNumber   Int
-  status        RoundStatus @default(SUBMITTING)
-  startedAt     DateTime?
-  endedAt       DateTime?
-  createdAt     DateTime    @default(now())
-
-  room          Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId        String
-
-  theme         Theme       @relation(fields: [themeId], references: [id])
-  themeId       String
-
-  responses     Response[]
+  id          String      @id @default(cuid())
+  roundNumber Int
+  status      RoundStatus @default(SUBMITTING)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime    @default(now())
+  roomId      String
+  themeId     String
+  responses   Response[]
+  room        Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  theme       Theme       @relation(fields: [themeId], references: [id])
 
   @@unique([roomId, roundNumber])
   @@map("rounds")
-}
-
-enum RoundStatus {
-  SUBMITTING
-  VOTING
-  FINISHED
 }
 
 model Theme {
@@ -168,40 +140,28 @@ model Theme {
   category    Category?
   isSystem    Boolean   @default(false)
   createdAt   DateTime  @default(now())
-
-  room        Room?     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId      String?
-
   rounds      Round[]
+  room        Room?     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@map("themes")
 }
 
-enum Category {
-  TEXT
-  IMAGE
-  PHOTO
-  VIDEO
-  AUDIO
-  DRAWING
-}
-
 model Response {
-  id          String    @id @default(cuid())
-  content     String
-  mediaUrl    String?
-  category    Category
-  createdAt   DateTime  @default(now())
-
-  round       Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  roundId     String
-
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId    String
-
-  upvotes     Int       @default(0)      
-  downvotes   Int       @default(0)
-  votes       Vote[]
+  id        String   @id @default(cuid())
+  content   String
+  mediaUrl  String?
+  category  Category
+  createdAt DateTime @default(now())
+  roundId   String
+  authorId  String
+  upvotes   Int      @default(0)
+  downvotes Int      @default(0)
+  roomId    String?
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  round     Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  votes     Vote[]
 
   @@unique([roundId, authorId, category])
   @@map("responses")
@@ -211,15 +171,42 @@ model Vote {
   id         String   @id @default(cuid())
   type       VoteType
   createdAt  DateTime @default(now())
-
-  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
   responseId String
-
-  voter      User     @relation(fields: [voterId], references: [id], onDelete: Cascade)
   voterId    String
-  
+  roomId     String?
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  room       Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  voter      User     @relation(fields: [voterId], references: [id], onDelete: Cascade)
+
   @@unique([responseId, voterId])
   @@map("votes")
+}
+
+enum MedalType {
+  FIRST_PLACE
+  SECOND_PLACE
+  THIRD_PLACE
+}
+
+enum RoomStatus {
+  WAITING
+  PLAYING
+  FINISHED
+}
+
+enum RoundStatus {
+  SUBMITTING
+  VOTING
+  FINISHED
+}
+
+enum Category {
+  TEXT
+  IMAGE
+  PHOTO
+  VIDEO
+  AUDIO
+  DRAWING
 }
 
 enum VoteType {

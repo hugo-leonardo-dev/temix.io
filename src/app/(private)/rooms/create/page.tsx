@@ -54,7 +54,7 @@ export default function CreateRoom() {
   const [formData, setFormData] = useState<RoomFormData>({
     name: "",
     maxPlayers: 6,
-    totalRounds: 7,
+    totalRounds: 1, // Default para 1 para facilitar teste
     upvotesPerPlayer: 3,
     downvotesPerPlayer: 1,
     allowedCategories: [],
@@ -82,7 +82,7 @@ export default function CreateRoom() {
       case 1:
         return formData.name.trim().length >= 3;
       case 2:
-        return formData.maxPlayers >= 2 && formData.totalRounds >= 3;
+        return formData.maxPlayers >= 2 && formData.totalRounds >= 1;
       case 3:
         return true;
       case 4:
@@ -231,7 +231,7 @@ export default function CreateRoom() {
                     size="icon"
                     onClick={() =>
                       updateFormData({
-                        totalRounds: Math.max(3, formData.totalRounds - 1),
+                        totalRounds: Math.max(1, formData.totalRounds - 1),
                       })
                     }
                     className="bg-zinc-800 border-zinc-700"
@@ -255,7 +255,7 @@ export default function CreateRoom() {
                   </Button>
                 </div>
                 <p className="text-xs text-zinc-500 mt-2">
-                  Between 3 and 15 rounds
+                  Between 1 and 15 rounds
                 </p>
               </div>
             </div>

@@ -27,6 +27,8 @@ const sectionConfig: Record<string, { border: string; glow: string }> = {
   },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const session = await auth();
   const userId = session!.user!.id;
