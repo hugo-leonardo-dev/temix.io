@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type Category = "TEXT" | "IMAGE" | "PHOTO" | "VIDEO" | "AUDIO" | "DRAWING";
+type Category = "TEXT" | "IMAGE" | "VIDEO" | "DRAWING";
 
 interface RoomFormData {
   name: string;
@@ -35,9 +35,7 @@ const CATEGORIES: { value: Category; label: string; icon: React.ReactNode }[] =
   [
     { value: "TEXT", label: "Text", icon: <Highlighter className="h-5 w-5" /> },
     { value: "IMAGE", label: "Image", icon: <Image className="h-5 w-5" /> },
-    { value: "PHOTO", label: "Photo", icon: <Camera className="h-5 w-5" /> },
     { value: "VIDEO", label: "Video", icon: <Video className="h-5 w-5" /> },
-    { value: "AUDIO", label: "Audio", icon: <Music className="h-5 w-5" /> },
     {
       value: "DRAWING",
       label: "Drawing",

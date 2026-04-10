@@ -115,11 +115,6 @@ async function main() {
       themes: {
         create: [
           {
-            title: "Foto mais embaraçosa",
-            category: "PHOTO",
-            isSystem: false,
-          },
-          {
             title: "Seu lugar favorito",
             category: "IMAGE",
             isSystem: false,

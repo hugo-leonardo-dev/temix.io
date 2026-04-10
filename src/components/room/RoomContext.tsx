@@ -69,8 +69,10 @@ export function RoomProvider({
         { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` },
         (payload) => {
           console.log("🏠 [Realtime] Room updated:", payload.new.status);
-          setRoom((prev: any) => ({ ...prev, ...payload.new }));
-          if (payload.new.status !== room.status) {
+          const newRoom = payload.new;
+          setRoom((prev: any) => ({ ...prev, ...newRoom }));
+          
+          if (newRoom.status !== room.status) {
             triggerRefresh();
           }
         }
@@ -81,6 +83,13 @@ export function RoomProvider({
         { event: "*", schema: "public", table: "rounds", filter: `roomId=eq.${roomId}` },
         (payload) => {
           console.log("🔄 [Realtime] Round event:", payload.eventType);
+          if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
+             setCurrentRound((prev: any) => {
+               // Evita sobrescrever se for um round antigo (opcional, mas seguro)
+               if (prev && payload.new.roundNumber < prev.roundNumber) return prev;
+               return { ...prev, ...payload.new };
+             });
+          }
           triggerRefresh();
         }
       )

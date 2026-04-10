@@ -62,18 +62,14 @@ interface DashboardClientProps {
 const categoryLabels: Record<string, string> = {
   TEXT: "Text",
   IMAGE: "Image",
-  PHOTO: "Photo",
   VIDEO: "Video",
-  AUDIO: "Audio",
   DRAWING: "Drawing",
 };
 
 const categoryColors: Record<string, string> = {
   TEXT: "from-blue-500 to-cyan-500",
   IMAGE: "from-purple-500 to-pink-500",
-  PHOTO: "from-amber-500 to-orange-500",
   VIDEO: "from-red-500 to-rose-500",
-  AUDIO: "from-green-500 to-emerald-500",
   DRAWING: "from-indigo-500 to-violet-500",
 };
 

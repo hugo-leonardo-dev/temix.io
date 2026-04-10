@@ -203,9 +203,7 @@ enum RoundStatus {
 enum Category {
   TEXT
   IMAGE
-  PHOTO
   VIDEO
-  AUDIO
   DRAWING
 }
 

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect, useRef } from "react";
-import { Send, Clock, Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Send, Clock, Loader2, Upload, X, Image as ImageIcon, Youtube } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -38,23 +38,11 @@ const CATEGORY_CONFIG: Record<
     inputType: "image-upload",
     helpText: "Capture a photo or select an image from your device",
   },
-  PHOTO: {
-    label: "Photo",
-    placeholder: "Select a photo...",
-    inputType: "image-upload",
-    helpText: "Capture a photo or select an image from your device",
-  },
   VIDEO: {
     label: "Video",
     placeholder: "https://youtube.com/watch?v=... or video URL",
     inputType: "url",
     helpText: "YouTube, Vimeo, or direct video link",
-  },
-  AUDIO: {
-    label: "Audio/Music",
-    placeholder: "Search for a song...",
-    inputType: "spotify",
-    helpText: "Spotify integration coming soon",
   },
   DRAWING: {
     label: "Drawing",
@@ -89,8 +77,10 @@ export default function SubmitPhase({
 
   // Initialize responses: empty or pre-filled from existing submissions
   useEffect(() => {
+    if (!round) return;
+
     const userResponses = round.responses?.filter(
-      (r: any) => r.authorId === room.currentUserId,
+      (r: any) => r.authorId === currentUserId,
     );
 
     const initialResponses: Record<string, CategoryResponse> = {};
@@ -356,18 +346,46 @@ export default function SubmitPhase({
                 )}
 
                 {config.inputType === "url" && (
-                  <div className="space-y-2">
-                    <Input
-                      type="url"
-                      value={response.content}
-                      onChange={(e) =>
-                        updateResponse(category, "content", e.target.value)
-                      }
-                      placeholder={config.placeholder}
-                      disabled={loading}
-                    />
-                    {config.helpText && (
-                      <p className="text-xs text-zinc-500">{config.helpText}</p>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <Input
+                        type="url"
+                        value={response.content}
+                        onChange={(e) =>
+                          updateResponse(category, "content", e.target.value)
+                        }
+                        placeholder={config.placeholder}
+                        disabled={loading}
+                        className="pr-10"
+                      />
+                      {response.content && (
+                        <button
+                          type="button"
+                          onClick={() => updateResponse(category, "content", "")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {getYouTubeID(response.content) ? (
+                      <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-zinc-700 bg-black group animate-in zoom-in-95 duration-300 shadow-2xl">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${getYouTubeID(response.content)}`}
+                          className="absolute inset-0 w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                        <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          <Youtube className="h-4 w-4 text-red-500" />
+                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">Live Preview</span>
+                        </div>
+                      </div>
+                    ) : (
+                      config.helpText && (
+                        <p className="text-xs text-zinc-500">{config.helpText}</p>
+                      )
                     )}
                   </div>
                 )}
@@ -377,7 +395,6 @@ export default function SubmitPhase({
                     <input
                       type="file"
                       accept="image/*"
-                      capture={category === "PHOTO" ? "environment" : undefined}
                       className="hidden"
                       ref={(el) => { fileInputRefs.current[category] = el; }}
                       onChange={(e) => {
@@ -430,25 +447,6 @@ export default function SubmitPhase({
                   </div>
                 )}
 
-                {config.inputType === "spotify" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-4 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700">
-                      <ImageIcon className="h-5 w-5 text-zinc-500" />
-                      <span className="text-sm text-zinc-400">
-                        Spotify integration coming soon...
-                      </span>
-                    </div>
-                    <Input
-                      type="url"
-                      value={response.content}
-                      onChange={(e) =>
-                        updateResponse(category, "content", e.target.value)
-                      }
-                      placeholder="For now, paste a Spotify URL"
-                      disabled={loading}
-                    />
-                  </div>
-                )}
 
                 {config.inputType === "drawing-canvas" && (
                   <div className="space-y-4">
@@ -550,4 +548,10 @@ function isValidUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function getYouTubeID(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
 }
