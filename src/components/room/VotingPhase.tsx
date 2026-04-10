@@ -8,15 +8,18 @@ import { ThumbsUp, ThumbsDown, Send, Clock } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useRoom } from "./RoomContext";
+
 export default function VotingPhase({
-  room,
-  round,
+  room: initialRoom,
+  round: initialRound,
   initialHasVoted,
 }: {
   room: any;
   round: any;
   initialHasVoted?: boolean;
 }) {
+  const { room, currentRound: round } = useRoom();
   const router = useRouter();
   const [hasVoted, setHasVoted] = useState(initialHasVoted || false);
   const [votes, setVotes] = useState<

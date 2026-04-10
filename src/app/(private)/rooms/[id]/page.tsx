@@ -7,12 +7,15 @@ import { RoomProvider } from "@/components/room/RoomContext";
 
 export const dynamic = "force-dynamic";
 
+import { auth } from "@/auth";
+
 export default async function RoomPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
 
   const room = await prisma.room.findUnique({
     where: { id },
@@ -44,7 +47,7 @@ export default async function RoomPage({
   const currentRound = room.rounds[0];
 
   return (
-    <RoomProvider initialData={room}>
+    <RoomProvider initialData={room} userId={session?.user?.id}>
       {room.status === "WAITING" ? (
         <WaitingLobby room={room} />
       ) : room.status === "FINISHED" ? (

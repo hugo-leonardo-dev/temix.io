@@ -64,13 +64,16 @@ const CATEGORY_CONFIG: Record<
   },
 };
 
+import { useRoom } from "./RoomContext";
+
 export default function SubmitPhase({
-  room,
-  round,
+  room: initialRoom,
+  round: initialRound,
 }: {
   room: any;
   round: any;
 }) {
+  const { room, currentRound: round, currentUserId } = useRoom();
   const router = useRouter();
   const [responses, setResponses] = useState<Record<string, CategoryResponse>>(
     {},
@@ -497,8 +500,16 @@ export default function SubmitPhase({
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
-            <p className="text-red-400 text-sm text-center">{error}</p>
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+            <div className="h-6 w-6 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
+              <X className="h-4 w-4 text-red-400" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-red-400 text-sm font-semibold">Something went wrong</p>
+              <p className="text-red-400/80 text-xs leading-relaxed">
+                Failed to submit your responses. Please check your internet connection and try again.
+              </p>
+            </div>
           </div>
         )}
 

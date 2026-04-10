@@ -8,6 +8,7 @@ interface RoomContextType {
   room: any;
   players: any[];
   currentRound: any;
+  currentUserId: string | null;
   isLoading: boolean;
   refresh: () => void;
 }
@@ -16,10 +17,12 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export function RoomProvider({ 
   children, 
-  initialData 
+  initialData,
+  userId = null
 }: { 
   children: React.ReactNode; 
-  initialData: any 
+  initialData: any;
+  userId?: string | null;
 }) {
   const [room, setRoom] = useState(initialData);
   const [players, setPlayers] = useState(initialData.players || []);
@@ -34,10 +37,10 @@ export function RoomProvider({
     
     refreshTimeoutRef.current = setTimeout(() => {
       startTransition(() => {
-        console.log("🔄 Triggering router.refresh()");
+        console.log("🔄 [Realtime] Triggering router.refresh() to sync with server");
         router.refresh();
       });
-    }, 500); // 500ms debounce
+    }, 800); // Increased debounce to ensure DB has finished writing
   };
 
   useEffect(() => {
@@ -47,7 +50,8 @@ export function RoomProvider({
   }, []);
 
   useEffect(() => {
-    // Sync local state with initialData if it changes from props (e.g. on navigation)
+    // Sincroniza o estado local quando as props do servidor mudam (após o refresh)
+    console.log("📦 [Realtime] Initial data updated from server:", initialData.status);
     setRoom(initialData);
     setPlayers(initialData.players || []);
     setCurrentRound(initialData.rounds?.[0] || null);
@@ -55,74 +59,73 @@ export function RoomProvider({
 
   useEffect(() => {
     const roomId = room.id;
+    console.log(`🔌 [Realtime] Connecting to room channel: room-sync-${roomId}`);
     
     const channel = supabase
       .channel(`room-sync-${roomId}`)
-      // 1. Listen to Room status changes
+      // 1. Mudanças na Sala (Status, etc)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` },
         (payload) => {
-          console.log("Room updated:", payload.new);
+          console.log("🏠 [Realtime] Room updated:", payload.new.status);
           setRoom((prev: any) => ({ ...prev, ...payload.new }));
-          // If status changed, we might want to refresh the whole page to swap components (Lobby -> Gameplay)
           if (payload.new.status !== room.status) {
             triggerRefresh();
           }
         }
       )
-      // 2. Listen to Rounds (Status changes, new round)
+      // 2. Mudanças nas Rodadas
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "rounds", filter: `roomId=eq.${roomId}` },
         (payload) => {
-          console.log("Round event:", payload.eventType, payload.new);
-          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
-            // For rounds, a status change often means we need new theme/responses data
-            // which the payload might not have in full (like the theme object).
-            // So we trigger a refresh to let Server Components fetch the full nested data.
-            triggerRefresh();
-          }
+          console.log("🔄 [Realtime] Round event:", payload.eventType);
+          triggerRefresh();
         }
       )
-      // 3. Listen to Player joins/leaves (room_players table)
+      // 3. Jogadores (Entrada/Saída)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "room_players", filter: `roomId=eq.${roomId}` },
-        () => {
-          console.log("Players changed");
-          triggerRefresh(); // Refresh to get the Player profile (relation)
+        (payload) => {
+          console.log("👥 [Realtime] Players changed:", payload.eventType);
+          triggerRefresh();
         }
       )
-      // 4. Listen to Responses (submissions)
+      // 4. Respostas (Submissões)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "responses", filter: `roomId=eq.${roomId}` },
-        () => {
-          console.log("Response submitted");
-          // Debounced refresh for responses to show count increment
+        (payload) => {
+          console.log("📝 [Realtime] Response event:", payload.eventType);
           triggerRefresh();
         }
       )
-      // 5. Listen to Votes
+      // 5. Votos
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "votes", filter: `roomId=eq.${roomId}` },
-        () => {
-          console.log("Vote cast");
-          // Only refresh if we are in the voting phase and need to show real-time counts
+        (payload) => {
+          console.log("🗳️ [Realtime] Vote event:", payload.eventType);
           triggerRefresh();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`📡 [Realtime] Subscription status: ${status}`);
+        if (status === "CHANNEL_ERROR") {
+          console.error("❌ [Realtime] Error connecting to Supabase Realtime. Check if Realtime is enabled in the dashboard.");
+        }
+      });
 
     return () => {
+      console.log("🔌 [Realtime] Disconnecting from room channel");
       supabase.removeChannel(channel);
     };
-  }, [room.id, room.status]);
+  }, [room.id, room.status]); // Re-subscribe if status changes to ensure fresh listeners if needed
 
   return (
-    <RoomContext.Provider value={{ room, players, currentRound, isLoading: isPending, refresh: triggerRefresh }}>
+    <RoomContext.Provider value={{ room, players, currentRound, currentUserId: userId, isLoading: isPending, refresh: triggerRefresh }}>
       {children}
     </RoomContext.Provider>
   );

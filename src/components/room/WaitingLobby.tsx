@@ -17,8 +17,10 @@ import {
   Check,
   Crown,
 } from "lucide-react";
+import { useRoom } from "./RoomContext";
 
-export default function WaitingLobby({ room }: { room: any }) {
+export default function WaitingLobby({ room: initialRoom }: { room: any }) {
+  const { room, players } = useRoom();
   const { data: session } = useSession();
   const router = useRouter();
   const [copied, setCopied] = useState(false);

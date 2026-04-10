@@ -51,7 +51,17 @@ export async function POST(
     // Upsert each response in a transaction
     await prisma.$transaction(async (tx) => {
       for (const resData of responses) {
-        if (!resData.content && !resData.mediaUrl) continue;
+        if (!resData.content && !resData.mediaUrl) {
+          console.log("⏩ skipping empty response for category:", resData.category);
+          continue;
+        }
+
+        // Validate category
+        if (!Object.values(Category).includes(resData.category as Category)) {
+          throw new Error(`Invalid category: ${resData.category}`);
+        }
+
+        console.log(`📝 Upserting response for round ${roundId}, user ${session.user.id}, category ${resData.category}`);
 
         await tx.response.upsert({
           where: {
@@ -64,7 +74,7 @@ export async function POST(
           update: {
             content: resData.content?.trim() || "",
             mediaUrl: resData.mediaUrl?.trim() || null,
-            roomId: roomId, // Garante que o roomId esteja presente
+            roomId: roomId,
           },
           create: {
             content: resData.content?.trim() || "",
@@ -72,7 +82,7 @@ export async function POST(
             category: resData.category as Category,
             roundId: round.id,
             authorId: session.user.id,
-            roomId: roomId, // Relaciona com a sala para o Realtime
+            roomId: roomId,
           },
         });
       }
@@ -107,9 +117,13 @@ export async function POST(
       allSubmitted,
     });
   } catch (error) {
-    console.error("Error submitting response:", error);
+    console.error("❌ [API Error] Error submitting response:", error);
+    
     return NextResponse.json(
-      { error: "Failed to submit response" },
+      { 
+        error: "Internal Server Error",
+        // No environment check here, we keep details strictly for the console logs as requested
+      },
       { status: 500 },
     );
   }

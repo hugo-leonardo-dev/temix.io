@@ -7,15 +7,18 @@ import { ArrowRight, Loader2, Trophy, Crown } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useRoom } from "./RoomContext";
+
 export default function RoundResults({
-  room,
-  round,
+  room: initialRoom,
+  round: initialRound,
   isHost,
 }: {
   room: any;
   round: any;
   isHost?: boolean;
 }) {
+  const { room, currentRound: round } = useRoom();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
